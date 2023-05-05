@@ -2,11 +2,20 @@ const configAdmin = require('../configadmin');
 const Fa = require('../models/fas');
 const Fc = require('../models/fcs');
 const Rm = require('../models/rms');
-//  console.log(configAdmin.username)
 
 // Admin login
 exports.loginAdmin = async (req, res) => {
-
+    const { username, password } = req.body;
+    try {
+        if (username === configAdmin.username && password === configAdmin.password){
+            res.status(200).json({ message: 'Login successful...' })
+        } else {
+            res.status(401).json({ message: 'Invalid credentials' })
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: 'Server error' })
+    }
 }
 
 // Create user
