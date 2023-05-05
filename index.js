@@ -1,14 +1,25 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-// const adminRoutes = require('./routes/admin')
-const adminRoutes = require('./routes/adminRoutes');
+const adminRouter = require('./routes/adminRoutes')
+
+require('./db'); // Establish connection to database
+require('dotenv').config(); // Access environment variables
 
 const app = express(); // Instantiate express application
-require('./db');
+const port = process.env.PORT || 3000;
 
-// Set up middleware
-app.use(express.json());
+// Set up middleware and cors
+app.use(bodyParser.json());
+app.use(cors());
 
 // Set up routes
-app.use('/auth/create-investment', adminRoutes);
+app.use('/', adminRouter)
+
+app.get('/', (req, res) => {
+    console.log("Working!!!");
+    res.send('Welcome to Wealth Affairs');
+})
+
+// Server setup
+app.listen(port, console.log(`Listening to the server at port: ${port}`))
