@@ -7,7 +7,7 @@ adminRouter.post('/auth/register-staff', adminController.createUser);
 adminRouter.get('/auth/staff', adminController.getUsers);
 adminRouter.get('/auth/staff/:id', adminController.getUser);
 adminRouter.patch('/auth/staff/:id/edit', adminController.editUser);
-adminRouter.delete('/auth/staff/:id/delete', adminController.deleteUser);
+adminRouter.delete('/auth/staff/:id', adminController.deleteUser);
 adminRouter.get('/auth/clients', adminController.getClients);
 adminRouter.get('/auth/clients/:id', adminController.getClient);
 adminRouter.patch('/auth/clients/:id/edit', adminController.editClient);

@@ -1,3 +1,4 @@
+const { default: mongoose } = require('mongoose');
 const configAdmin = require('../configadmin');
 const staff = require('../models/staff');
 const bcrypt = require('bcrypt');
@@ -69,6 +70,20 @@ exports.createUser = async (req, res) => {
         password: encryptPassword
     }
 
+    // Check if phone number or email already exists in the db
+    const existingStaffInfo = await staff.findOne({ $or: [{ email: staffEmail}, { phoneNo: phoneno }]})
+    
+    if (existingStaffInfo){
+        if (existingStaffInfo.phoneNo === phoneno){
+            res.status(409).json({ errorMessage: 'Phone number already exists.'});
+            return;
+        }
+        if (existingStaffInfo.email === staffEmail){
+            res.status(409).json({ errorMessage: 'Email already exists.'});
+            return;
+        }
+    }
+
     // Save staff to the database
     try {
         const createStaff = await new staff(staffData);
@@ -89,7 +104,9 @@ exports.createUser = async (req, res) => {
 // View all users
 exports.getUsers =  async (req, res) => {
     try {
-        const staffList = await staff.find();
+        // const staffList = await staff.find().select('-password -role -email'); // Exclude multiple fields
+        // const staffList = await staff.find({}, {password: 0, role: 0, firstname: 0}); // Exclude multiple fields
+        const staffList = await staff.find().select('-password');
         if (staffList.length === 0) res.status(200).json({ message: 'No staff found!'})
         else {
             console.log(staffList.length)
@@ -99,17 +116,42 @@ exports.getUsers =  async (req, res) => {
         console.log(error.message);
         res.status(500).json({ errorMessage: 'Server Error. Please try again' })
     }
-
 }
 
 // View each user (id)
 exports.getUser =  async (req, res) => {
-
+    try {
+        const staffId = req.params.id;
+        // Check if the staff id is valid before interacting with the database
+        if (!mongoose.Types.ObjectId.isValid(staffId)) return res.status(404).json({ message: 'Invalid Staff ID'})
+        const staffInfo = await staff.findById(staffId).select('-password');
+        if (!staffInfo) return res.status(404).json({message: 'Staff not found!'});
+        return res.status(200).json({ staffInfo });
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ errorMessage: 'Internal Server Error' })
+    }
 }
 
 // Modify user details (id)
 exports.editUser =  async (req, res) => {
+    try {
+        const staffId = req.params.id;
+        if (!mongoose.Types.ObjectId.isValid(staffId)) return res.status(404).json({ message: 'Invalid ID' })
 
+        if (req.body.role === 'FA') role = 'Fund Administrator';
+        else if (req.body.role === 'FC') role = 'Fund Controller';
+        else if (req.body.role === 'RM') role = 'Relationship Manager';
+        else return res.status(404).json({ message: 'Role Not Assigned'});
+        
+        const modifiedStaffInfo = {...req.body, role: role};
+        const updateStaffInfo = await staff.findByIdAndUpdate(staffId, modifiedStaffInfo, { new: true }).select('-password');
+        if (updateStaffInfo === null) return res.status(404).json({ message: 'Staff ID does not exists in the database' })
+        return res.status(200).json({message: 'Profile updated.', updateStaffInfo})
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ errorMessage: 'Internal Server Error' })
+    }
 }
 
 // View delete user (id)
