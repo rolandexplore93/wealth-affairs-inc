@@ -1,15 +1,17 @@
 const configAdmin = require('../configadmin');
 const staff = require('../models/staff');
+const bcrypt = require('bcrypt');
 // const Fa = require('../models/fas');
 // const Fc = require('../models/fcs');
 // const Rm = require('../models/rms');
+
 let crypto;
-crypto = require('node:crypto');
-// try {
-// //   console.log(crypto)
-// } catch (err) {
-//   console.error('crypto support is disabled!');
-// }
+crypto = require('node:crypto'); // For randam generation of bytes
+try {
+//   console.log(crypto)
+} catch (err) {
+  console.error('crypto support is disabled!');
+}
 
 // Admin login
 exports.loginAdmin = async (req, res) => {
@@ -38,8 +40,12 @@ exports.createUser = async (req, res) => {
     else if (role === 'RM') { role = 'Relationship Manager'}
     else { role = 'Role Not Assigned'}
 
+    // Generate email for staff
+    const staffEmail = `${firstname.toLowerCase().slice(0,1)}${middlename.toLowerCase().slice(0,1)}${lastname.toLowerCase().slice(0,1)}${phoneno.toLowerCase().slice(-3)}${companydomainmail}`;
+    
+    // Generate password for staff
     const generatePassword = () => {
-        const passwordLength = 10;
+        const passwordLength = 8;
         const characters = '0123456789abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         const randomBytes = crypto.randomBytes(passwordLength);
         const passoutcome = new Array(passwordLength)
@@ -52,18 +58,30 @@ exports.createUser = async (req, res) => {
         }
         return passoutcome.join('')
     }
-    
+    const staffPassword = await generatePassword()
+    const salt = await bcrypt.genSalt();
+    const encryptPassword = await bcrypt.hash(staffPassword, salt)
+
+    const staffData = {
+        firstname, middlename, lastname, role, 
+        phoneNo: phoneno, 
+        email: staffEmail,  
+        password: encryptPassword
+    }
+
+    // Save staff to the database
     try {
-        const staffPassword = await generatePassword()
-        let generateEmail = `${firstname.toLowerCase().slice(0,1)}${middlename.toLowerCase().slice(0,1)}${lastname.toLowerCase().slice(0,1)}${phoneno.toLowerCase().slice(-3)}${companydomainmail}`;
-        // console.log(generateEmail);
+        const createStaff = await new staff(staffData);
+        const staffAddedToDb = await createStaff.save();
+        console.log(staffAddedToDb)
         res.status(200).json({
             message: 'Staff created successfully.',
-            generateEmail, pw: staffPassword, role
+            staffAddedToDb,
+            password: staffPassword
         })
     } catch (error) {
         console.log(error.message);
-        res.status(500).json({ errorMessage: 'Server Error. Please try again' })
+        res.status(500).json({ errorMessage: error.message })
     }
 
 }
