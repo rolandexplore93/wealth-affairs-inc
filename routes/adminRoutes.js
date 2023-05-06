@@ -11,6 +11,6 @@ adminRouter.delete('/auth/staff/:id', adminController.deleteUser);
 adminRouter.get('/auth/clients', adminController.getClients);
 adminRouter.get('/auth/clients/:id', adminController.getClient);
 adminRouter.patch('/auth/clients/:id/edit', adminController.editClient);
-adminRouter.delete('/auth/clients/:id/delete', adminController.deleteClient);
+adminRouter.delete('/auth/clients/:id', adminController.deleteClient);
 
 module.exports = adminRouter;

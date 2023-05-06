@@ -36,10 +36,11 @@ exports.createUser = async (req, res) => {
     const companydomainmail = '@wealthaffairs.com';
 
     // Confirm roles
-    if (role === 'FA') { role = 'Fund Administrator'}
-    else if (role === 'FC') { role = 'Fund Controller'}
-    else if (role === 'RM') { role = 'Relationship Manager'}
-    else { role = 'Role Not Assigned'}
+    if (role === 'FA') role = 'Fund Administrator';
+    else if (role === 'FC') role = 'Fund Controller';
+    else if (role === 'RM') role = 'Relationship Manager';
+    else return res.status(404).json({ message: 'Role Not Assigned'});
+
 
     // Generate email for staff
     const staffEmail = `${firstname.toLowerCase().slice(0,1)}${middlename.toLowerCase().slice(0,1)}${lastname.toLowerCase().slice(0,1)}${phoneno.toLowerCase().slice(-3)}${companydomainmail}`;
@@ -146,8 +147,8 @@ exports.editUser =  async (req, res) => {
         
         const modifiedStaffInfo = {...req.body, role: role};
         const updateStaffInfo = await staff.findByIdAndUpdate(staffId, modifiedStaffInfo, { new: true }).select('-password');
-        if (updateStaffInfo === null) return res.status(404).json({ message: 'Staff ID does not exists in the database' })
-        return res.status(200).json({message: 'Profile updated.', updateStaffInfo})
+        if (updateStaffInfo === null) return res.status(404).json({ message: 'Staff ID does not exists in the database' });
+        return res.status(200).json({ message: 'Profile updated.', updateStaffInfo });
     } catch (error) {
         console.log(error.message);
         return res.status(500).json({ errorMessage: 'Internal Server Error' })
@@ -156,7 +157,16 @@ exports.editUser =  async (req, res) => {
 
 // View delete user (id)
 exports.deleteUser =  async (req, res) => {
-
+    try {
+        const staffId = req.params.id;
+        if (!mongoose.Types.ObjectId.isValid(staffId)) return res.status(404).json({ message: 'Invalid ID' });
+        const deleteStaffProfile = await staff.findByIdAndDelete(staffId);
+        if (deleteStaffProfile === null) return res.status(404).json({ message: 'Staff profile does not exists in the database' });
+        return res.status(200).json({ message: 'Staff account deleted!' });
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ errorMessage: 'Internal Server Error' })
+    }
 }
 
 // View all clients
