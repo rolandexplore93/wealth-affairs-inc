@@ -2,6 +2,8 @@ const { default: mongoose } = require('mongoose');
 const validate =  require('validator');
 const bcrypt = require('bcrypt');
 const clients = require('../models/client');
+const jwt = require('jsonwebtoken');
+require('dotenv').config(); // Access environment variables
 
 // Register a client
 exports.signUp = async (req, res) => {
@@ -36,6 +38,27 @@ exports.signUp = async (req, res) => {
             message: 'Account created successfully.',
             registeredClient
         })
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ errorMessage: `Internal Server Error: ${error.message}` });
+    }
+}
+
+exports.login = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const clientInfo = await clients.findOne({ email })
+        if (!clientInfo) return res.status(404).json({ message: 'Invalid email or password.' });
+
+        // Compare input password with the client password stored in the database
+        const comparePassword = await bcrypt.compare(password, clientInfo.password);
+        if (!comparePassword) return res.status(404).json({ message: 'Invalid login details'});
+
+        // Generate tokens for the user after login
+        const token = jwt.sign({ id: clientInfo._id}, process.env.SECRETJWT, {
+            expiresIn: '60 secs'
+        });
+        res.status(200).json({ message: 'Login successful.', token });
     } catch (error) {
         console.log(error.message);
         return res.status(500).json({ errorMessage: `Internal Server Error: ${error.message}` });
