@@ -176,7 +176,7 @@ exports.getClients =  async (req, res) => {
     try {
         const allClients = await clients.find();
         if (allClients.length === 0) return res.status(200).json({ message: 'No registered client yet!'});
-        return res.status(200).json({ message: `${allClients.length} found.`, data: `${allClients}` })
+        return res.status(200).json({ message: `${allClients.length} found.`, allClients })
     } catch (error) {
         console.log(error.message);
         return res.status(500).json({ errorMessage: `Internal Server Error: ${error.message}` });
@@ -216,6 +216,9 @@ exports.deleteClient =  async (req, res) => {
         const clientId = req.params.id;
         // Check if the client id is valid before interacting with the database
         if (!mongoose.Types.ObjectId.isValid(clientId)) return res.status(404).json({ message: 'Invalid Client ID'});
+        const deleteClientProfile = await clients.findByIdAndDelete(clientId);
+        if (deleteClientProfile === null) return res.status(404).json({ message: 'Client profile does not exists in the database' });
+        return res.status(200).json({ message: 'Client account has been deleted!' });
     } catch (error) {
         console.log(error.message);
         return res.status(500).json({ errorMessage: `Internal Server Error: ${error.message}` });

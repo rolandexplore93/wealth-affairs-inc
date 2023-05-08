@@ -7,7 +7,7 @@ const clientSchema = new Schema({
     lastname: { type: String, required: true},
     email: { type: String, required: true, unique: true},
     password: { type: String, required: true},
-    phoneNo: { type: String, unique: true, default: '' },
+    phoneNo: { type: String, default: '' },
     country: { type: String, default: '' },
     relationshipManager: { type: Schema.Types.ObjectId, ref: 'Staff', default: null },
     isRMAssigned: { type: Boolean, default: false },
