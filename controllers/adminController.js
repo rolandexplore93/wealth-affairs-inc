@@ -1,7 +1,9 @@
 const { default: mongoose } = require('mongoose');
 const configAdmin = require('../configadmin');
-const staff = require('../models/staff');
 const bcrypt = require('bcrypt');
+const staff = require('../models/staff');
+const clients = require('../models/client');
+// clients
 // const Fa = require('../models/fas');
 // const Fc = require('../models/fcs');
 // const Rm = require('../models/rms');
@@ -90,14 +92,14 @@ exports.createUser = async (req, res) => {
         const createStaff = await new staff(staffData);
         const staffAddedToDb = await createStaff.save();
         console.log(staffAddedToDb)
-        res.status(200).json({
+        return res.status(200).json({
             message: 'Staff created successfully.',
             staffAddedToDb,
             password: staffPassword
         })
     } catch (error) {
         console.log(error.message);
-        res.status(500).json({ errorMessage: error.message })
+        return res.status(500).json({ errorMessage: error.message })
     }
 
 }
@@ -108,14 +110,14 @@ exports.getUsers =  async (req, res) => {
         // const staffList = await staff.find().select('-password -role -email'); // Exclude multiple fields
         // const staffList = await staff.find({}, {password: 0, role: 0, firstname: 0}); // Exclude multiple fields
         const staffList = await staff.find().select('-password');
-        if (staffList.length === 0) res.status(200).json({ message: 'No staff found!'})
+        if (staffList.length === 0) return res.status(200).json({ message: 'No staff found!'})
         else {
             console.log(staffList.length)
-            res.status(200).json({ message: 'Staff list displayed below', staffList })
+            return res.status(200).json({ message: 'Staff list displayed below', staffList })
         }
     } catch (error) {
         console.log(error.message);
-        res.status(500).json({ errorMessage: 'Server Error. Please try again' })
+        return res.status(500).json({ errorMessage: `Internal Server Error: ${error.message}. Please try again...` });
     }
 }
 
@@ -130,7 +132,7 @@ exports.getUser =  async (req, res) => {
         return res.status(200).json({ staffInfo });
     } catch (error) {
         console.log(error.message);
-        return res.status(500).json({ errorMessage: 'Internal Server Error' })
+        return res.status(500).json({ errorMessage: `Internal Server Error: ${error.message}` });
     }
 }
 
@@ -151,7 +153,7 @@ exports.editUser =  async (req, res) => {
         return res.status(200).json({ message: 'Profile updated.', updateStaffInfo });
     } catch (error) {
         console.log(error.message);
-        return res.status(500).json({ errorMessage: 'Internal Server Error' })
+        return res.status(500).json({ errorMessage: `Internal Server Error: ${error.message}` });
     }
 }
 
@@ -165,18 +167,35 @@ exports.deleteUser =  async (req, res) => {
         return res.status(200).json({ message: 'Staff account deleted!' });
     } catch (error) {
         console.log(error.message);
-        return res.status(500).json({ errorMessage: 'Internal Server Error' })
+        return res.status(500).json({ errorMessage: `Internal Server Error: ${error.message}` });
     }
 }
 
 // View all clients
 exports.getClients =  async (req, res) => {
-
+    try {
+        const allClients = await clients.find();
+        if (allClients.length === 0) return res.status(200).json({ message: 'No registered client yet!'});
+        return res.status(200).json({ message: `${allClients.length} found.`, data: `${allClients}` })
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ errorMessage: `Internal Server Error: ${error.message}` });
+    }
 }
 
 // View each client
 exports.getClient =  async (req, res) => {
-
+    try {
+        const clientId = req.params.id;
+        // Check if the client id is valid before interacting with the database
+        if (!mongoose.Types.ObjectId.isValid(clientId)) return res.status(404).json({ message: 'Invalid Client ID'});
+        const clientInfo = await clients.findById(clientId).select('-password');
+        if (!clientInfo) return res.status(404).json({message: 'Client not found!'});
+        return res.status(200).json({ clientInfo });
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ errorMessage: `Internal Server Error: ${error.message}` });
+    }
 }
 
 // Modify client details (id)
