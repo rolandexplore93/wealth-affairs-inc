@@ -3,17 +3,20 @@ const { Schema } = mongoose;
 
 const clientSchema = new Schema({
     firstname: { type: String, required: true},
+    middlename: { type: String, default: '' },
+    lastname: { type: String, required: true},
     email: { type: String, required: true, unique: true},
     password: { type: String, required: true},
-    phoneNo: { type: String, unique: true },
-    country: { type: String },
-    relationshipManager: { type: Schema.Types.ObjectId, ref: 'Staff' },
-    isAssignedRM: { type: Boolean, default: false },
+    phoneNo: { type: String, unique: true, default: '' },
+    country: { type: String, default: '' },
+    relationshipManager: { type: Schema.Types.ObjectId, ref: 'Staff', default: null },
+    isRMAssigned: { type: Boolean, default: false },
     isPreferencesSet: { type: Boolean, default: false },
     investmentPreferences: {
         riskLevel: { 
             type: Number,
-            enum: [1, 2, 3, 4, 5]
+            enum: [1, 2, 3, 4, 5],
+            default: null
          },
         productTypes: [{ type: Schema.Types.ObjectId, ref: 'ProductType' }],
         industries: [{ type: Schema.Types.ObjectId, ref: 'Industry' }],
@@ -28,8 +31,6 @@ module.exports = mongoose.model('Client', clientSchema)
 
 
 
-// middlename: { type: String },
-// lastname: { type: String, required: true},
 // address: { type: String },
 // postcode: { type: String },
 // city: { type: String },

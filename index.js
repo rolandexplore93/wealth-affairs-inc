@@ -2,10 +2,11 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const adminRouter = require('./routes/adminRoutes');
+const clientRouter = require('./routes/clientRoutes');
 
 require('./db'); // Establish connection to database
 require('dotenv').config(); // Access environment variables
-const { swaggerSpecs, swaggerUi } = require('./swagger') // Import swagger.js module
+const { swaggerSpecs, swaggerUi } = require('./swagger'); // Import swagger.js module
 
 const app = express(); // Instantiate express application
 const port = process.env.PORT || 3000;
@@ -34,6 +35,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
 // Set up routes
 app.use('/', adminRouter)
+app.use('/', clientRouter);
 
 app.get('/', (req, res) => {
     console.log("Working!!!");

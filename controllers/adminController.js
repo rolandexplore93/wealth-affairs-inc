@@ -200,10 +200,24 @@ exports.getClient =  async (req, res) => {
 
 // Modify client details (id)
 exports.editClient =  async (req, res) => {
-
+    try {
+        const clientId = req.params.id;
+        // Check if the client id is valid before interacting with the database
+        if (!mongoose.Types.ObjectId.isValid(clientId)) return res.status(404).json({ message: 'Invalid Client ID'});
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ errorMessage: `Internal Server Error: ${error.message}` });
+    }
 }
 
 // Delete client
 exports.deleteClient =  async (req, res) => {
-
+    try {
+        const clientId = req.params.id;
+        // Check if the client id is valid before interacting with the database
+        if (!mongoose.Types.ObjectId.isValid(clientId)) return res.status(404).json({ message: 'Invalid Client ID'});
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ errorMessage: `Internal Server Error: ${error.message}` });
+    }
 }
