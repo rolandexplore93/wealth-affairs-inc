@@ -55,10 +55,10 @@ exports.login = async (req, res) => {
         if (!comparePassword) return res.status(404).json({ message: 'Invalid login details'});
 
         // Generate tokens for the user after login
-        const token = jwt.sign({ id: clientInfo._id}, process.env.SECRETJWT, {
-            expiresIn: '60 secs'
-        });
-        res.status(200).json({ message: 'Login successful.', token });
+        // const token = jwt.sign({ id: clientInfo._id}, process.env.SECRETJWT, {
+        //     expiresIn: '60 secs'
+        // });
+        res.status(200).json({ message: 'Login successful.' });
     } catch (error) {
         console.log(error.message);
         return res.status(500).json({ errorMessage: `Internal Server Error: ${error.message}` });
@@ -88,23 +88,20 @@ exports.forgotPassword = async (req, res) => {
     }
 }
 
-exports.resetPassword = async (req, res) => {
+exports.resetPasswordValidateToken = async (req, res) => {
     try {
-        // const { newPassword, confirmNewPassword } = req.body;
-
-        // Find the user with the same token
+        // Find the user with the same token if the token has not expired
         const client = await clients.findOne({
             resetToken: req.params.token,
-            // resetTokenExpiration: { $gt: new Date().getTime() }
+            resetTokenExpiration: { $gt: new Date().getTime() }
         });
-
-        // Token has expired. Note: Implement from frontend to redirect user to forgot-password request page
-        if (!client) return res.status(400).json({ message: 'Password reset token has expired. Please, request forgot password again.' })
         
-        // return res.json({ message: client })
-        // Token is valid. Note: Implement from frontend to load reset-password form for user to submit new password
+        // Token has expired. Note: Implement from frontend to redirect user to forgot-password request page
+        if (!client) return res.status(400).json({ message: 'Password reset token has expired. Please, request forgot password again.' });
+        
+        // Token is valid. Note: Then implement from frontend to load reset-password form for user to submit new password
         // res.render('/reset-password/', { token: req.params.token})  // direct to form page
-        return res.status(200).json({message: 'Token is valid. You can now set new password'})
+        return res.status(200).json({message: `Token is valid for ${client.email}. You can now set new password`})
 
     } catch (error) {
         console.log(error.message);
@@ -112,10 +109,30 @@ exports.resetPassword = async (req, res) => {
     }
 }
 
-// Check and secure client password
-// if (password.length < 8 || password.length > 15) return res.status(404).json({ message: 'Password length must be between 8-15.' });
-// if (!(password.toLowerCase() == confirmPassword.toLowerCase())) return res.status(404).json({ message: 'Password do not match.' });
-// const salt = await bcrypt.genSalt();
-// const encryptClientPassword = await bcrypt.hash(password, salt);
+exports.resetPassword = async (req, res) => {
+    try {
+        const { newPassword, confirmNewPassword } = req.body;
+        const client = await clients.findOne({
+            resetToken: req.params.token,
+            resetTokenExpiration: { $gt: new Date().getTime() }
+        });
+        if (!client) return res.status(400).json({ message: 'Password reset token has expired. Please, request forgot password again.' })
 
-// const registerClientInfo = { password: encryptClientPassword };
+        // Check and secure client password
+        if (newPassword.length < 8 || newPassword.length > 15) return res.status(404).json({ message: 'Password length must be between 8-15.' });
+        if (!(newPassword.toLowerCase() == confirmNewPassword.toLowerCase())) return res.status(404).json({ message: 'Password do not match.' });
+        const salt = await bcrypt.genSalt();
+        const encryptClientPassword = await bcrypt.hash(newPassword, salt);
+        
+        // Update the client password field and set resetToken & resetTokenExpiration to undefined 
+        client.password = encryptClientPassword;
+        client.resetToken = undefined;
+        client.resetTokenExpiration = undefined;
+        await client.save()
+        
+        return res.status(200).json({ message: 'Your password has been updated successfully' })        
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ errorMessage: `Internal Server Error: ${error.message}` });
+    }
+}
