@@ -22,7 +22,9 @@ const clientSchema = new Schema({
         industries: [{ type: Schema.Types.ObjectId, ref: 'Industry' }],
         countries: [{ type: Schema.Types.ObjectId, ref: 'Country' }],
         regions: [{ type: Schema.Types.ObjectId, ref: 'Region' }],
-    }
+    },
+    resetToken: { type: String },
+    resetTokenExpiration: { type: Date }
 }, { timestamps: true})
 
 module.exports = mongoose.model('Client', clientSchema)

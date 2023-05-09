@@ -1,6 +1,8 @@
 const express = require('express');
 const adminRouter = express.Router();
 const adminController = require('../controllers/adminController');
+const updateSchemaController = require('../controllers/updateSchemaController');
+
 
 adminRouter.post('/login/admin', adminController.loginAdmin);
 adminRouter.post('/auth/register-staff', adminController.createUser);

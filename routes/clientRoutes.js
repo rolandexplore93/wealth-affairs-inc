@@ -5,7 +5,9 @@ const clientController = require('../controllers/clientController');
 clientRouter.post('/register', clientController.signUp);
 // clientRouter.post('/validate-email', clientController.signUp);
 clientRouter.post('/login', clientController.login);
-// clientRouter.post('/forgot-password', clientController.signUp);
+clientRouter.post('/forgot-password', clientController.forgotPassword);
+clientRouter.get('/reset-password/:token', clientController.resetPassword);
+clientRouter.post('/reset-password/:token', clientController.resetPassword);
 // clientRouter.post('/auth/id/edit', clientController.signUp);
 // clientRouter.post('/auth/id/setup-preferences', clientController.signUp);
 

@@ -33,6 +33,24 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
  * 
 */
 
+/**
+ * @swagger
+ * /login/admin:
+ *  post:
+ *      summary: Login admin
+ *      description: Login admin to their portal
+ *      responses:
+ *          200:
+ *              description: Login admin to their portal...
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          type: string
+ *                          items:
+//  *                              $ref: '#/models/'
+ * 
+*/
+
 // Set up routes
 app.use('/', adminRouter)
 app.use('/', clientRouter);
