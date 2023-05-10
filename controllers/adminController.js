@@ -3,10 +3,6 @@ const configAdmin = require('../configadmin');
 const bcrypt = require('bcrypt');
 const staff = require('../models/staff');
 const clients = require('../models/client');
-// clients
-// const Fa = require('../models/fas');
-// const Fc = require('../models/fcs');
-// const Rm = require('../models/rms');
 
 let crypto;
 crypto = require('node:crypto'); // For randam generation of bytes
@@ -90,7 +86,7 @@ exports.createUser = async (req, res) => {
     // Save staff to the database
     try {
         const createStaff = await new staff(staffData);
-        const staffAddedToDb = await createStaff.save();
+        const staffAddedToDb = await createStaff.save().select('-password');
         console.log(staffAddedToDb)
         return res.status(200).json({
             message: 'Staff created successfully.',
@@ -101,10 +97,9 @@ exports.createUser = async (req, res) => {
         console.log(error.message);
         return res.status(500).json({ errorMessage: error.message })
     }
-
 }
 
-// View all users
+// View all staff users
 exports.getUsers =  async (req, res) => {
     try {
         // const staffList = await staff.find().select('-password -role -email'); // Exclude multiple fields
@@ -174,9 +169,9 @@ exports.deleteUser =  async (req, res) => {
 // View all clients
 exports.getClients =  async (req, res) => {
     try {
-        const allClients = await clients.find();
+        const allClients = await clients.find().select('-password');
         if (allClients.length === 0) return res.status(200).json({ message: 'No registered client yet!'});
-        return res.status(200).json({ message: `${allClients.length} found.`, allClients })
+        return res.status(200).json({ count: `${allClients.length}`, allClients })
     } catch (error) {
         console.log(error.message);
         return res.status(500).json({ errorMessage: `Internal Server Error: ${error.message}` });

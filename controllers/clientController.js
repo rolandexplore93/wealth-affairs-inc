@@ -77,7 +77,7 @@ exports.forgotPassword = async (req, res) => {
         // Email is valid, then generate a reset token with jwt and save it to the database
         const token = await jwt.sign({ _id: getClient._id }, process.env.SECRETJWT, { expiresIn: '60s'});
         getClient.resetToken = token;
-        getClient.resetTokenExpiration = new Date().getTime() + 60000 // Expires in 60 seconds
+        getClient.resetTokenExpiration = new Date().getTime() + 120000 // Expires in 60 seconds
         await getClient.save();
 
         const resetUrl = `http://${req.headers.host}/reset-password/${token}`;
