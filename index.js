@@ -42,3 +42,5 @@ app.get('/', (req, res) => {
 
 // Server setup
 app.listen(port, console.log(`Listening to the server at port: ${port}`));
+
+// Updated nodejs to latest version
