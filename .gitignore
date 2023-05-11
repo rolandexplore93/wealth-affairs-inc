@@ -1,5 +1,4 @@
 node_modules
 .env
 configadmin.js
-swagger.js
 package-lock.json
