@@ -1,7 +1,8 @@
-// const { default: mongoose } = require('mongoose');
 const validate =  require('validator');
 const staff = require('../models/staff');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+require('dotenv').config(); // Access environment variables
 
 exports.staffLogin = async (req, res) => {
     const { email, password } = req.body;
@@ -23,8 +24,8 @@ exports.staffLogin = async (req, res) => {
         } else {
             return res.status(400).json({ message: 'User role not assigned' })
         };
-        
-        return res.status(200).json({ message: 'Logged successful. Redirecting...', redirectionUrl })
+        const loginToken = await jwt.sign({ _id: staffList._id, role: staffList.role}, process.env.SECRETJWT, { expiresIn: '120s' });
+        return res.status(200).json({ message: 'Logged successful. Redirecting...', redirectionUrl, loginToken });
     } catch (error) {
      console.log(error.message);
      res.status(500).json({ message: error.message});

@@ -4,6 +4,7 @@ const cors = require('cors');
 const adminRouter = require('./routes/adminRoutes');
 const clientRouter = require('./routes/clientRoutes');
 const staffRouter = require('./routes/staffRoutes');
+const faRouter = require('./routes/faRoutes');
 
 require('./db'); // Establish connection to database
 require('dotenv').config(); // Access environment variables
@@ -36,6 +37,7 @@ app.use(swagger); // Mount swagger middleware
 app.use('/', adminRouter);
 app.use('/', clientRouter);
 app.use('/', staffRouter);
+app.use('/', faRouter);
 
 app.get('/', (req, res) => {
     console.log("Working!!!");
