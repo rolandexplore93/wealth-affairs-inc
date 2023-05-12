@@ -55,4 +55,5 @@ const options = {
 
 const swaggerSpecs = swaggerJsdoc(options); // Initialising swagger specs
 router.use('/api', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
+// router.use('/https://wealth-affairs.onrender.com', swaggerUi.serve, swaggerUi.setup(swaggerSpecs)); // production
 module.exports = router;
