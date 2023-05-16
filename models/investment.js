@@ -5,7 +5,7 @@ const investmentSchema = new Schema({
     investmentDisplayName: { type: String, required: true },
     investmentName: { type: String, required: true },
     primaryAssetType: { type: String, required: true },
-    secondaryAssetType: { type: String, required: true },
+    secondaryAssetType: { type: String, default: '' },
     industry: { type: String, required: true },
     country: { type: String, required: true },
     region: { type: String, required: true },
@@ -18,9 +18,11 @@ const investmentSchema = new Schema({
     maturityDate: { type: Date, required: true },
     coupon: [{ type: String }],
     riskLevel: { type: Number, enum: [1, 2, 3, 4, 5], required: true },
+    riskLevelBrief: { type: String },
+    riskLevelDescription: { type: String },
     status: { type: String, enum: ['PENDING', 'APPROVED', 'REJECTED'], default: 'PENDING' },
-    createdBy: { type: Schema.Types.ObjectId, ref: 'Staff' },
-    decidedBy: { type: Schema.Types.ObjectId, ref: 'Staff' },
+    createdByStaff: { type: Schema.Types.ObjectId, ref: 'Staff', default: null },
+    decidedByStaff: { type: Schema.Types.ObjectId, ref: 'Staff', default: null },
 }, { timestamps: true });
 
 const investmentModel = mongoose.model('investment', investmentSchema);

@@ -1,0 +1,1 @@
+const investment = require('../models/investment');
