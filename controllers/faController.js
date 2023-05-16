@@ -30,17 +30,14 @@ exports.authoriseStaff = async (req, res, next) => {
         if (staffRole === 'Fund Administrator'){
             // Access granted to FA. Store FA id inside request body
             req.staffId = staffId;
-            // res.status(200).json({ message: 'Access to FA page', sid: req.staffId });
             next();
         } else if (staffRole === 'Fund Controller'){
             // Access granted to FC. Store FC id inside request body
             req.staffId = staffId;
-            // res.status(200).json({ message: 'Access to FC page', sid: req.staffId });
             next();
         } else if (staffRole === 'Relationship Manager'){
             // Access granted to RM. Store RM id inside request body
             req.staffId = staffId;
-            // res.status(200).json({ message: 'Access to RM page', sid: req.staffId });
             next();
         } else {
             // Staff cannot access the page. Output an error response to the user
