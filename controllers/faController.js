@@ -50,6 +50,7 @@ exports.authoriseStaff = async (req, res, next) => {
     }
 };
 
+// Create an investment
 exports.createInvestment = async (req, res) => {
     const { investmentDisplayName, investmentName, primaryAssetType, secondaryAssetType,
         industry, country, region, issuer, stockExchange, currency, unit, closingPrice, priceClosingDate,
@@ -82,13 +83,57 @@ exports.createInvestment = async (req, res) => {
         createdByStaff:  req.body.createdByStaff || null, 
         decidedByStaff:  req.body.decidedByStaff || null, 
     }
-    // console.log(req.body)
 
     try {
         const investmentData = await new investment(investmentBody);
         const createdInvestment = await investmentData.save();
-        return res.status(200).json({ message: "Investment has been created...", createdInvestment })
+        return res.status(200).json({ message: "Investment has been created...", createdInvestment });
     } catch (error) {
         return res.status(500).json({ message: error.message});
     }
 };
+
+// View all investments
+exports.allInvestments = async (req, res) => {
+    try {
+        const investments = await investment.find();
+        if (!investments) return res.status(400).json({ message: `No Investment Found.` })
+        return res.status(200).json({ investments })
+    } catch (error) {
+        return res.status(500).json({ message: error.message});
+    }
+};
+
+// Sort: view APPROVED investments
+exports.approvedInvestments = async (req, res) => {
+    try {
+        const approvedInvestments = await investment.findOne({ status: 'APPROVED'});
+        if (!approvedInvestments) return res.status(400).json({ message: `No Approved Investment Found.` })
+        return res.status(200).json({ approvedInvestments })
+    } catch (error) {
+        return res.status(500).json({ message: error.message});
+    }
+};
+
+// Sort: view PENDING investments
+exports.pendingInvestments = async (req, res) => {
+    try {
+        const pendingInvestments = await investment.findOne({ status: 'PENDING'});
+        if (!pendingInvestments) return res.status(400).json({ message: `No Pending Investment Found.` })
+        return res.status(200).json({ pendingInvestments })
+    } catch (error) {
+        return res.status(500).json({ message: error.message});
+    }
+};
+
+// Sort: view REJECTED investments
+exports.rejectedInvestments = async (req, res) => {
+    try {
+        const rejectedInvestments = await investment.findOne({ status: 'REJECTED'});
+        if (!rejectedInvestments) return res.status(400).json({ message: `No Rejected Investment Found.` })
+        return res.status(200).json({ rejectedInvestments })
+    } catch (error) {
+        return res.status(500).json({ message: error.message});
+    }
+};
+
