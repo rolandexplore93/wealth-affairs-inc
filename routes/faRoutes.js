@@ -10,7 +10,7 @@ faRouter.get('/investments', faController.allInvestments);
 faRouter.get('/approved-investments', faController.approvedInvestments);
 faRouter.get('/pending-investments', faController.pendingInvestments);
 faRouter.get('/rejected-investments', faController.rejectedInvestments);
-// faRouter.post('/investments/:id', faController.eachInvestment);
+faRouter.patch('/investments/:id', faController.editInvestment);
 // faRouter.post('/investments/:id', faController.eachInvestment);
 // faRouter.post('/investments/:id', faController.eachInvestment);
 // faRouter.post('/investments/:id', faController.eachInvestment);
