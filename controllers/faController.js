@@ -144,10 +144,10 @@ exports.rejectedInvestments = async (req, res) => {
 };
 
 // View each investment
-exports.eachInvestment = async (req, res) => {
-    const { id } = req.body;
+exports.viewTargetInvestment = async (req, res) => {
+    const investmentId = req.params.id;
     try {
-        const investments = await investment.findById({ id });
+        const investments = await investment.findById(investmentId);
         if (!investments) return res.status(400).json({ message: `No Investment Found.` })
         return res.status(200).json({ investments })
     } catch (error) {
