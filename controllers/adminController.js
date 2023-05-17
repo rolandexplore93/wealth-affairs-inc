@@ -1,8 +1,10 @@
+require('dotenv').config(); // Access environment variables
 const { default: mongoose } = require('mongoose');
 const configAdmin = require('../configadmin');
 const bcrypt = require('bcrypt');
 const staff = require('../models/staff');
 const clients = require('../models/client');
+const jwt = require('jsonwebtoken');
 
 let crypto;
 crypto = require('node:crypto'); // For randam generation of bytes
@@ -18,7 +20,11 @@ exports.loginAdmin = async (req, res) => {
     const uname = username.toLowerCase();
     try {
         if (uname === configAdmin.username && password === configAdmin.password){
-            res.status(200).json({ message: 'Login successful...' })
+            const loginToken = await jwt.sign({ _id: configAdmin.id, username: configAdmin.username }, process.env.SECRETJWT, { expiresIn: '120s' });
+            res.set('Authorization', `Bearer ${loginToken}`);
+            // Set login token in client-side cookies as HTTP-only cookie
+            // res.cookie('authToken', loginToken, { httpOnly: true });
+            res.status(200).json({ message: 'Login successful...', loginToken });
         } else {
             res.status(401).json({ message: 'Invalid credentials. Please, enter correct username and password' })
         }
@@ -30,6 +36,8 @@ exports.loginAdmin = async (req, res) => {
 
 // Create user
 exports.createUser = async (req, res) => {
+    // Grant access to only admin
+    if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Sorry, only Admin can access this page' });
     let { firstname, middlename, lastname, phoneno, role } = req.body;
     const companydomainmail = '@wealthaffairs.com';
 
@@ -102,13 +110,15 @@ exports.createUser = async (req, res) => {
 // View all staff users
 exports.getUsers =  async (req, res) => {
     try {
+        // Grant access to only admin
+        if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Sorry, only Admin can access this page' });
         // const staffList = await staff.find().select('-password -role -email'); // Exclude multiple fields
         // const staffList = await staff.find({}, {password: 0, role: 0, firstname: 0}); // Exclude multiple fields
         const staffList = await staff.find().select('-password');
         if (staffList.length === 0) return res.status(200).json({ message: 'No staff found!'})
         else {
             console.log(staffList.length)
-            return res.status(200).json({ message: 'Staff list displayed below', staffList })
+            return res.status(200).json({ message: 'Staff list displayed below', data: req.user, staffList })
         }
     } catch (error) {
         console.log(error.message);
@@ -118,6 +128,8 @@ exports.getUsers =  async (req, res) => {
 
 // View each user (id)
 exports.getUser =  async (req, res) => {
+    // Grant access to only admin
+    if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Sorry, only Admin can access this page' });
     try {
         const staffId = req.params.id;
         // Check if the staff id is valid before interacting with the database
@@ -133,6 +145,8 @@ exports.getUser =  async (req, res) => {
 
 // Modify user details (id)
 exports.editUser =  async (req, res) => {
+    // Grant access to only admin
+    if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Sorry, only Admin can access this page' });
     try {
         const staffId = req.params.id;
         if (!mongoose.Types.ObjectId.isValid(staffId)) return res.status(404).json({ message: 'Invalid ID' })
@@ -154,6 +168,8 @@ exports.editUser =  async (req, res) => {
 
 // View delete user (id)
 exports.deleteUser =  async (req, res) => {
+    // Grant access to only admin
+    if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Sorry, only Admin can access this page' });
     try {
         const staffId = req.params.id;
         if (!mongoose.Types.ObjectId.isValid(staffId)) return res.status(404).json({ message: 'Invalid ID' });
@@ -168,6 +184,8 @@ exports.deleteUser =  async (req, res) => {
 
 // View all clients
 exports.getClients =  async (req, res) => {
+    // Grant access to only admin
+    if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Sorry, only Admin can access this page' });
     try {
         const allClients = await clients.find().select('-password');
         if (allClients.length === 0) return res.status(200).json({ message: 'No registered client yet!'});
@@ -180,6 +198,8 @@ exports.getClients =  async (req, res) => {
 
 // View each client
 exports.getClient =  async (req, res) => {
+    // Grant access to only admin
+    if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Sorry, only Admin can access this page' });
     try {
         const clientId = req.params.id;
         // Check if the client id is valid before interacting with the database
@@ -195,6 +215,8 @@ exports.getClient =  async (req, res) => {
 
 // Modify client details (id)
 exports.editClient =  async (req, res) => {
+    // Grant access to only admin
+    if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Sorry, only Admin can access this page' });
     try {
         const clientId = req.params.id;
         // Check if the client id is valid before interacting with the database
@@ -207,6 +229,8 @@ exports.editClient =  async (req, res) => {
 
 // Delete client
 exports.deleteClient =  async (req, res) => {
+    // Grant access to only admin
+    if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Sorry, only Admin can access this page' });
     try {
         const clientId = req.params.id;
         // Check if the client id is valid before interacting with the database

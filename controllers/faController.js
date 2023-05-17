@@ -5,25 +5,29 @@ const investment = require('../models/investment');
 
 
 exports.authFa = async (req, res) => {
-    res.status(200).json({ message: `Welcome to FA page`});
+    // console.log(req.user);
+    res.status(200).json({ message: `Welcome to FA page`, data: req.user });
 };
 
 exports.authFc = async (req, res) => {
-    res.status(200).json({ message: `Welcome to FC page`});
+    // console.log(req.user);
+    res.status(200).json({ message: `Welcome to FC page`, data: req.user });
 };
 
 exports.authRm = async (req, res) => {
-    res.status(200).json({ message: `Welcome to RM page`});
+    // console.log(req.user);
+    res.status(200).json({ message: `Welcome to RM page`, data: req.user });
 };
 
 // Middleware to authorise FA
 exports.authoriseStaff = async (req, res, next) => {
-    const retrieveLoginToken = req.headers.authorization.slice(8, -1);
+    const retrieveLoginToken = req.headers.authorization;
     if (!retrieveLoginToken) return res.status(401).json({ message: 'Missing authorisation token' });
+    const accessLoginToken = retrieveLoginToken.slice(8, -1);
 
     try {
         // Verify and decode the token to get user data stored in it
-        const decodedLoginToken = await jwt.verify(retrieveLoginToken, process.env.SECRETJWT);
+        const decodedLoginToken = await jwt.verify(accessLoginToken, process.env.SECRETJWT);
         const staffId = decodedLoginToken._id;
         const staffRole = decodedLoginToken.role;
 
@@ -137,3 +141,14 @@ exports.rejectedInvestments = async (req, res) => {
     }
 };
 
+// View each investment
+exports.eachInvestment = async (req, res) => {
+    const { id } = req.body;
+    try {
+        const investments = await investment.findById({ id });
+        if (!investments) return res.status(400).json({ message: `No Investment Found.` })
+        return res.status(200).json({ investments })
+    } catch (error) {
+        return res.status(500).json({ message: error.message});
+    }
+};

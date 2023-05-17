@@ -25,6 +25,7 @@ exports.staffLogin = async (req, res) => {
             return res.status(400).json({ message: 'User role not assigned' })
         };
         const loginToken = await jwt.sign({ _id: staffList._id, role: staffList.role}, process.env.SECRETJWT, { expiresIn: '120s' });
+        res.set('Authorization', `Bearer ${loginToken}`);
         return res.status(200).json({ message: 'Logged successful. Redirecting...', redirectionUrl, loginToken });
     } catch (error) {
      console.log(error.message);
