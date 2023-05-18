@@ -8,7 +8,7 @@ clientRouter.post('/login', clientController.login);
 clientRouter.post('/forgot-password', clientController.forgotPassword);
 clientRouter.get('/reset-password/:token', clientController.resetPasswordValidateToken);
 clientRouter.post('/reset-password/:token', clientController.resetPassword);
-// clientRouter.post('/auth/id/edit', clientController.signUp);
+clientRouter.patch('/auth/edit-profile', clientController.updateProfile);
 // clientRouter.post('/auth/id/setup-preferences', clientController.signUp);
 
 // clientRouter.post('/auth/id/view-recommended-ivst', clientController.signUp);

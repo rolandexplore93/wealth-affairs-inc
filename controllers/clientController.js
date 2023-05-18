@@ -5,7 +5,7 @@ const clients = require('../models/client');
 const jwt = require('jsonwebtoken');
 require('dotenv').config(); // Access environment variables
 
-// Register a client
+// client signup
 exports.signUp = async (req, res) => {
     // console.log(req.body);
     const { firstname, middlename, lastname, email, password, confirmPassword} = req.body;
@@ -43,6 +43,7 @@ exports.signUp = async (req, res) => {
     }
 };
 
+// Client signin
 exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -134,5 +135,18 @@ exports.resetPassword = async (req, res) => {
     } catch (error) {
         console.log(error.message);
         return res.status(500).json({ errorMessage: `Internal Server Error: ${error.message}` });
+    }
+};
+
+
+exports.updateProfile = async (req, res) => {
+    // Get client id from session storage when client is authorised to their page
+    const { _id, firstname, middlename, lastname, email, phoneNo, country } = req.body;
+    try {
+        if (!mongoose.Types.ObjectId.isValid(_id)) return res.status(400).json({ message: 'Investment ID is invalid' });
+        await clients.findByIdAndUpdate(_id, {firstname, middlename, lastname, email, phoneNo, country}, { new: true });
+        return res.status(200).json({ message: 'Profile updated.' });
+    } catch (error) {
+        return res.status(500).json({ message: error.message});
     }
 }
