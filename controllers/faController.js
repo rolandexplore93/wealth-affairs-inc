@@ -5,17 +5,14 @@ const jwt = require('jsonwebtoken');
 const investment = require('../models/investment');
 
 exports.authFa = async (req, res) => {
-    // console.log(req.user);
     res.status(200).json({ message: `Welcome to FA page`, data: req.user });
 };
 
 exports.authFc = async (req, res) => {
-    // console.log(req.user);
     res.status(200).json({ message: `Welcome to FC page`, data: req.user });
 };
 
 exports.authRm = async (req, res) => {
-    // console.log(req.user);
     res.status(200).json({ message: `Welcome to RM page`, data: req.user });
 };
 
@@ -146,6 +143,7 @@ exports.rejectedInvestments = async (req, res) => {
 // View each investment
 exports.viewTargetInvestment = async (req, res) => {
     const investmentId = req.params.id;
+    if (!mongoose.Types.ObjectId.isValid(investmentId)) return res.status(404).json({ message: 'Invalid ID' });
     try {
         const investments = await investment.findById(investmentId);
         if (!investments) return res.status(400).json({ message: `No Investment Found.` })
@@ -201,4 +199,4 @@ exports.editInvestment = async (req, res) => {
     } catch (error) {
         return res.status(500).json({ message: error.message});
     }
-}
+};
