@@ -9,6 +9,7 @@ clientRouter.post('/forgot-password', clientController.forgotPassword);
 clientRouter.get('/reset-password/:token', clientController.resetPasswordValidateToken);
 clientRouter.post('/reset-password/:token', clientController.resetPassword);
 clientRouter.patch('/auth/edit-profile', clientController.updateProfile);
+clientRouter.patch('/auth/edit-preferences', clientController.updatePreferences);
 // clientRouter.post('/auth/id/setup-preferences', clientController.signUp);
 
 // clientRouter.post('/auth/id/view-recommended-ivst', clientController.signUp);

@@ -3,6 +3,7 @@ const validate =  require('validator');
 const bcrypt = require('bcrypt');
 const clients = require('../models/client');
 const jwt = require('jsonwebtoken');
+const { ProductType, Industry, Country, Region } = require('../models/preferences');
 require('dotenv').config(); // Access environment variables
 
 // client signup
@@ -149,4 +150,67 @@ exports.updateProfile = async (req, res) => {
     } catch (error) {
         return res.status(500).json({ message: error.message});
     }
-}
+};
+
+exports.updatePreferences = async (req, res) => {
+    try {
+        // Get client id from session storage when client is authorised to their page
+        const { _id, riskLevel, priProductTypes, secProductTypes, priIndustries, secIndustries, countries, regions } = req.body;
+        if (!mongoose.Types.ObjectId.isValid(_id)) return res.status(400).json({ message: 'Investment ID is invalid' });
+        
+        const clientProfile = await clients.findOne({_id});
+        let productTypesId;
+        let industriesId;
+        let countriesId;
+        let regionsId;
+
+        // Set product types preferences
+        if (clientProfile.investmentPreferences.productTypes == ''){
+            const prdt = await new ProductType({ priProductTypes, secProductTypes }).save();
+            productTypesId = prdt._id;
+        } else {
+            productTypesId = clientProfile.investmentPreferences.productTypes;
+            await ProductType.findByIdAndUpdate(productTypesId, { priProductTypes, secProductTypes }, { new: true });
+        };
+
+        // Set industries preferences
+        if (clientProfile.investmentPreferences.industries == ''){
+            const ind = await new Industry({ priIndustries, secIndustries }).save();
+            industriesId = ind._id;
+        } else {
+            industriesId = clientProfile.investmentPreferences.industries;
+            await Industry.findByIdAndUpdate(industriesId, { priIndustries, secIndustries }, { new: true });
+        };
+
+        // Set countries preferences
+        if (clientProfile.investmentPreferences.countries == ''){
+            const country = await new Country({ countries }).save();
+            countriesId = country._id;
+        } else {
+            countriesId = clientProfile.investmentPreferences.countries;
+            await Country.findByIdAndUpdate(countriesId, { countries }, { new: true });
+        };
+
+        // Set regions preferences
+        if (clientProfile.investmentPreferences.regions == ''){
+            const region = await new Region({ regions }).save();
+            regionsId = region._id;
+        } else {
+            regionsId = clientProfile.investmentPreferences.regions;
+            await Region.findByIdAndUpdate(regionsId, { regions }, { new: true });
+        };
+
+        await clients.findByIdAndUpdate(_id, {
+            investmentPreferences: {
+                riskLevel: riskLevel,
+                productTypes: productTypesId,
+                industries: industriesId,
+                countries: countriesId,
+                regions: regionsId
+            }
+        }, { new: true});
+        return res.status(200).json({ message: 'Client preferences successfully updated' });
+    } catch (error) {
+        return res.status(500).json({ message: error.message});
+    }
+};
