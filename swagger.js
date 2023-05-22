@@ -40,7 +40,7 @@ const options = {
             version: '1.0.0',
         },
         servers: [
-            // { url: 'http://localhost:3000' }, // testing
+            { url: 'http://localhost:3000' }, // testing
             { url: 'https://wealth-affairs.onrender.com' } // production
         ],
         tags: [
@@ -69,12 +69,12 @@ const options = {
                 description: 'Operations about clients'
             }
         ],
-        paths: {...adminRoutesDocs}
+        paths: {...adminRoutesDocs},
+        components: {...adminRoutesDocs}
     },
     apis: ['./index.js', './routes/*.js']
 };
 
 const swaggerSpecs = swaggerJsdoc(options); // Initialising swagger specs
 router.use('/api', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
-// router.use('/https://wealth-affairs.onrender.com', swaggerUi.serve, swaggerUi.setup(swaggerSpecs)); // production
 module.exports = router;

@@ -2,9 +2,10 @@ const listClients = {
     tags: ['Admin'],
     summary: 'Get a list of all clients',
     description: 'List all registered clients',
+    operationId: 'getClients',
     responses: {
         200: {
-            description: 'Ok',
+            description: 'Successful operation',
             content: {
                 'application/json': {
                     schema: {
@@ -39,9 +40,7 @@ const listClients = {
                 }
             }
         },
-        500: {
-            description: 'Internal server error',
-        }
+        500: { description: 'Internal server error' }
     }
 };
 
@@ -87,45 +86,49 @@ const createUser = {
     tags: ['Admin'],
     summary: 'Create staff (FA, FC, RM) account',
     description: 'Create staff account',
+    operationId: 'createUser',
     requestBody: {
+        description: 'Create a new staff profile',
         content: {
             'application/json': {
                 schema: {
-                    type: 'object',
-                    properties: {
-                        firstname: {
-                            type: 'string',
-                            description: 'Firstname of the staff',
-                            example: 'Oroland'
-                        },
-                        middlename: {
-                            type: 'string',
-                            description: 'Middlename of the staff',
-                            example: 'RollyJS'
-                        },
-                        lastname: {
-                            type: 'string',
-                            description: 'Lastname of the staff',
-                            example: 'Oguns'
-                        },
-                        phoneno: {
-                            type: 'string',
-                            description: 'Staff phone number',
-                            example: '02458612621'
-                        },
-                        role: {
-                            type: 'string',
-                            description: 'Staff role, whether FA, FC or RM',
-                            example: 'RM'
-                        },
-                    }
+                    $ref: '#components/schemas/staff'
+                    // type: 'object',
+                    // properties: {
+                    //     firstname: {
+                    //         type: 'string',
+                    //         description: 'Firstname of the staff',
+                    //         example: 'Oroland'
+                    //     },
+                    //     middlename: {
+                    //         type: 'string',
+                    //         description: 'Middlename of the staff',
+                    //         example: 'RollyJS'
+                    //     },
+                    //     lastname: {
+                    //         type: 'string',
+                    //         description: 'Lastname of the staff',
+                    //         example: 'Oguns'
+                    //     },
+                    //     phoneno: {
+                    //         type: 'string',
+                    //         description: 'Staff phone number',
+                    //         example: '02458612621'
+                    //     },
+                    //     role: {
+                    //         type: 'string',
+                    //         description: 'Staff role, whether FA, FC or RM',
+                    //         example: 'RM'
+                    //     },
+                    // }
                 }
             }
-        }
+        },
+        required: true
     },
     responses: {
         200: {
-            description: 'Ok',
+            description: 'Successful operation',
             content: {
                 'application/json': {
                     schema: {
@@ -219,6 +222,42 @@ const adminRoutesDocs = {
     },
     '/auth/register-staff': {
         post: createUser
+    },
+    // Components configuration
+    schemas: {
+        staff: {
+            required: ['firstname', 'lastname', 'phoneno', 'role'],
+            type: 'object',
+            properties: {
+                firstname: {
+                    type: 'string',
+                    description: 'Staff firstname',
+                    example: 'Orobola'
+                },
+                middlename: {
+                    type: 'string',
+                    description: 'Staff middlename',
+                    example: 'RollyJS'
+                },
+                lastname: {
+                    type: 'string',
+                    description: 'Staff lastname',
+                    example: 'Oguns'
+                },
+                phoneno: {
+                    type: 'string',
+                    description: 'Staff phone number',
+                    example: '02458612621'
+                },
+                role: {
+                    type: 'string',
+                    description: 'Staff role (FA, FC, RM)',
+                    example: 'RM',
+                    enum: ['FA', 'FC', 'RM']
+                    // enum: ['Pending', 'Approved', 'Rejected']
+                },
+            }
+        }
     }
 };
 
