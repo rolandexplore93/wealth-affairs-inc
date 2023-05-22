@@ -18,19 +18,19 @@ app.use(bodyParser.json());
 app.use(cors());
 app.use(swagger); // Mount swagger middleware
 
-/**
- * @swagger
- * /:
- *  get:
- *      summary: This the welcome page
- *      description: Welcome here
- *      responses:
- *          200:
- *              description: To test get homepage is working
- *              content:
- *                  application/json:
- * 
-*/
+// /**
+//  * @swagger
+//  * /:
+//  *  get:
+//  *      summary: This the welcome page
+//  *      description: Welcome here
+//  *      responses:
+//  *          200:
+//  *              description: To test get homepage is working
+//  *              content:
+//  *                  application/json:
+//  * 
+// */
 
 // Set up routes
 app.use('/', adminRouter);
