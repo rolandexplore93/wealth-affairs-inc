@@ -150,8 +150,8 @@ const createUser = {
                             ]
                         },
                     },
-                }
-            }
+                },
+            },
         },
         409: {
             description: 'Conflict: Email or phone number already exists',
@@ -159,7 +159,10 @@ const createUser = {
         500: {
             description: 'Internal server error',
         }
-    }
+    },
+    // security: [
+    //     api_key: []
+    // ]
 
 };
 
@@ -257,6 +260,126 @@ const adminRoutesDocs = {
                     // enum: ['Pending', 'Approved', 'Rejected']
                 },
             }
+        },
+        investment: {
+            required: ['investmentDisplayName', 'investmentName', 'primaryAssetType', 
+            'industry', 'country', 'region', 'issuer', 'stockExchange', 'currency', 'unit', 'closingPrice',
+            'priceClosingDate', 'maturityDate', 'riskLevel', 'createdByStaff'],
+            type: 'object',
+            properties: {
+                investmentDisplayName: {
+                    type: 'string',
+                    example: 'AWS'
+                },
+                investmentName: {
+                    type: 'string',
+                    example: 'Amazon Web Services'
+                },
+                primaryAssetType: {
+                    type: 'string',
+                    example: 'Bonds'
+                },
+                secondaryAssetType: {
+                    type: 'string',
+                    example: 'Convertible Bond'
+                },
+                industry: {
+                    type: 'string',
+                    example: 'Technology'
+                },
+                country: {
+                    type: 'string',
+                    example: 'United States'
+                },
+                region: {
+                    type: 'string',
+                    example: 'North America'
+                },
+                issuer: {
+                    type: 'string',
+                    example: 'AWS2023X1'
+                },
+                stockExchange: {
+                    type: 'string',
+                    example: 'NYSE'
+                },
+                currency: {
+                    type: 'string',
+                    example: 'USD'
+                },
+                unit: {
+                    type: 'Number',
+                    example: '2'
+                },
+                closingPrice: {
+                    type: 'Number',
+                    example: '200.25'
+                },
+                priceClosingDate: {
+                    type: 'Date',
+                    example: '15/08/2023'
+                },
+                maturityDate: {
+                    type: 'Date',
+                    example: '15/12/2023'
+                },
+                coupon: {
+                    type: 'string',
+                    example: 'Og22u5'
+                },
+                riskLevel: {
+                    type: 'Number',
+                    example: '1'
+                },
+                createdByStaff: {
+                    type: 'string',
+                    example: 'RM',
+                    enum: ['FA1', 'FC1', 'RM1', 'FA2', 'FC2', 'RM2']
+                },
+            }
+        },
+    //     investmentDisplayName: { type: String, required: true },
+    // investmentName: { type: String, required: true },
+    // primaryAssetType: { type: String, required: true },
+    // secondaryAssetType: { type: String, default: '' },
+    // industry: { type: String, required: true },
+    // country: { type: String, required: true },
+    // region: { type: String, required: true },
+    // issuer: { type: String, required: true },
+    // stockExchange: { type: String, required: true },
+    // currency: { type: String, required: true },
+    // unit: { type: Number, required: true },
+    // closingPrice: { type: Number, required: true },
+    // priceClosingDate: { type: Date, required: true },
+    // maturityDate: { type: Date, required: true },
+    // coupon: [{ type: String }],
+    // riskLevel: { type: Number, enum: [1, 2, 3, 4, 5], required: true },
+    // riskLevelBrief: { type: String },
+    // riskLevelDescription: { type: String },
+    // status: { type: String, enum: ['PENDING', 'APPROVED', 'REJECTED'], default: 'PENDING' },
+    // createdByStaff: { type: Schema.Types.ObjectId, ref: 'Staff', default: null },
+    // decidedByStaff: { type: Schema.Types.ObjectId, ref: 'Staff', default: null },
+        securitySchemes: {
+            wa_auth: {
+                type: 'Bearer',
+                flow: {
+                    implicit: {
+                        authorizationUrl: '',
+                        scopes: {
+                            write: {
+                                admin: {
+                                    // 'Modify accpount'
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            // api_key: {
+            //     // type: apiKey,
+            //     name: api_key,
+            //     in: header
+            // }
         }
     }
 };
