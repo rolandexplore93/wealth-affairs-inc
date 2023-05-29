@@ -20,22 +20,22 @@ exports.loginAdmin = async (req, res) => {
     const uname = username.toLowerCase();
     try {
         if (uname === configAdmin.username && password === configAdmin.password){
-            const loginToken = await jwt.sign({ _id: configAdmin.id, username: configAdmin.username }, process.env.SECRETJWT, { expiresIn: '120s' });
+            const loginToken = await jwt.sign({ _id: configAdmin.id, username: configAdmin.username }, process.env.SECRETJWT, { expiresIn: '180s' });
             res.set('Authorization', `Bearer ${loginToken}`);
             // Set login token in client-side cookies as HTTP-only cookie
             // res.cookie('authToken', loginToken, { httpOnly: true });
             res.status(200).json({ message: 'Login successful...', loginToken });
         } else {
-            res.status(401).json({ message: 'Invalid credentials. Please, enter correct username and password' })
+            res.status(401).json({ message: 'Invalid credentials. Please, enter correct username and password.' })
         }
     } catch (error) {
         console.log(error.message);
-        res.status(500).json({ errorMessage: 'Server Error. Please try again' })
+        res.status(500).json({ errorMessage: 'Server Error. Please try again.' })
     }
 }
 
-// Create user
-exports.createUser = async (req, res) => {
+// Create staff user
+exports.createStaffUser = async (req, res) => {
     // Grant access to only admin
     if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Sorry, only Admin can access this page' });
     let { firstname, middlename, lastname, phoneno, role } = req.body;
@@ -108,7 +108,7 @@ exports.createUser = async (req, res) => {
 }
 
 // View all staff users
-exports.getUsers =  async (req, res) => {
+exports.getAllStaff =  async (req, res) => {
     try {
         // Grant access to only admin
         if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Sorry, only Admin can access this page' });
@@ -127,13 +127,13 @@ exports.getUsers =  async (req, res) => {
 }
 
 // View each user (id)
-exports.getUser =  async (req, res) => {
+exports.getStaffById =  async (req, res) => {
     // Grant access to only admin
     if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Sorry, only Admin can access this page' });
     try {
         const staffId = req.params.id;
         // Check if the staff id is valid before interacting with the database
-        if (!mongoose.Types.ObjectId.isValid(staffId)) return res.status(404).json({ message: 'Invalid Staff ID'})
+        if (!mongoose.Types.ObjectId.isValid(staffId)) return res.status(400).json({ message: 'Invalid Staff ID'})
         const staffInfo = await staff.findById(staffId).select('-password');
         if (!staffInfo) return res.status(404).json({message: 'Staff not found!'});
         return res.status(200).json({ staffInfo });
@@ -144,7 +144,7 @@ exports.getUser =  async (req, res) => {
 }
 
 // Modify user details (id)
-exports.editUser =  async (req, res) => {
+exports.editStaff =  async (req, res) => {
     // Grant access to only admin
     if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Sorry, only Admin can access this page' });
     try {
@@ -167,7 +167,7 @@ exports.editUser =  async (req, res) => {
 }
 
 // View delete user (id)
-exports.deleteUser =  async (req, res) => {
+exports.deleteStaff =  async (req, res) => {
     // Grant access to only admin
     if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Sorry, only Admin can access this page' });
     try {
@@ -197,7 +197,7 @@ exports.getClients =  async (req, res) => {
 }
 
 // View each client
-exports.getClient =  async (req, res) => {
+exports.getClientById =  async (req, res) => {
     // Grant access to only admin
     if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Sorry, only Admin can access this page' });
     try {

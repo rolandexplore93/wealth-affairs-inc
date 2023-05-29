@@ -1,3 +1,39 @@
+const adminLogin = {
+    tags: ['Admin'],
+    summary: 'Authenticate admin into the system',
+    description: 'Admin is authenticated to perform designated activities',
+    operationId: 'loginAdmin',
+    requestBody: {
+        description: 'Admin login details',
+        content: {
+            'application/json': {
+                schema: {
+                    $ref: '#components/schemas/admin'
+                }
+            }
+        },
+        required: true
+    },
+    responses: {
+        200: {
+            description: 'Login successful',
+            content: {
+                'application/json': {
+                    schema: {
+                        type: 'object',
+                        example: {
+                            message: 'Login successful...',
+                            loginToken: 'hbdjkns2yy27bxs013u. (Token is valid for 2 minutes)'
+                        }
+                    }
+                }
+            }
+        },
+        401: { description: 'Invalid credentials. Please, enter correct username and password.' },
+        500: { description: 'Server error. Please try again.' }
+    }
+}
+
 const listClients = {
     tags: ['Admin'],
     summary: 'Get a list of all clients',
@@ -41,13 +77,24 @@ const listClients = {
             }
         },
         500: { description: 'Internal server error' }
-    }
+    },
+    security: [
+        {
+            wealthAffairsAuth: [
+                // "create:data", 
+                "read:data", 
+                // "write:data", 
+                // "delete:data"
+            ]
+        }
+    ]
 };
 
 const listStaff = {
     tags: ['Admin'],
     summary: 'list all staff users',
     description: 'List all staff',
+    operationId: 'getAllStaff',
     responses: {
         200: {
             description: 'Ok',
@@ -79,7 +126,16 @@ const listStaff = {
         500: {
             description: 'Internal server error',
         }
-    }
+    },
+    security: [
+        {
+            wealthAffairsAuth: [
+                "read:data", 
+                "write:data", 
+                "delete:data"
+            ]
+        }
+    ]
 };
 
 const createUser = {
@@ -160,23 +216,33 @@ const createUser = {
             description: 'Internal server error',
         }
     },
-    // security: [
-    //     api_key: []
-    // ]
-
+    security: [
+        {
+            wealthAffairsAuth: [
+                "create:data", 
+                // "read:data", 
+                // "write:data", 
+                // "delete:data"
+            ]
+        }
+    ]
 };
 
 const getStaffUserById = {
     tags: ['Admin'],
     summary: 'Get a staff details from path ID',
     description: 'Get a staff details',
+    operationId: 'getUserById',
     parameters: [
         {
-            name: 'id',
+            name: 'staffId',
             in: 'path',
-            description: 'staff id',
-            type: 'string',
-            example: '645bc9f1862a73aace1c5dde'
+            description: 'Id of the staff to return',
+            required: true,
+            schema: {
+                type: 'string',
+                example: '645bc9f1862a73aace1c5dde'
+            }
         }
     ],
     responses: {
@@ -204,16 +270,31 @@ const getStaffUserById = {
                 }
             }
         },
+        400: {
+            description: 'Invalid Staff ID',
+        },
         404: {
             description: 'Staff not found',
         },
         500: {
             description: 'Internal server error',
         }
-    }
+    },
+    security: [
+        {
+            wealthAffairsAuth: [
+                "read:data", 
+                // "write:data", 
+                // "delete:data"
+            ]
+        }
+    ]
 };
 
 const adminRoutesDocs = {
+    '/login/admin': {
+        post: adminLogin,
+    },
     '/auth/clients': {
         get: listClients,
     },
@@ -228,6 +309,20 @@ const adminRoutesDocs = {
     },
     // Components configuration
     schemas: {
+        admin: {
+            required: ['username', 'password'],
+            type: 'object',
+            properties: {
+                username: {
+                    type: 'string',
+                    example: 'rolly'
+                },
+                password: {
+                    type: 'string',
+                    example: 'rolly'
+                }
+            }
+        },
         staff: {
             required: ['firstname', 'lastname', 'phoneno', 'role'],
             type: 'object',
@@ -337,51 +432,46 @@ const adminRoutesDocs = {
                     enum: ['FA1', 'FC1', 'RM1', 'FA2', 'FC2', 'RM2']
                 },
             }
-        },
-    //     investmentDisplayName: { type: String, required: true },
-    // investmentName: { type: String, required: true },
-    // primaryAssetType: { type: String, required: true },
-    // secondaryAssetType: { type: String, default: '' },
-    // industry: { type: String, required: true },
-    // country: { type: String, required: true },
-    // region: { type: String, required: true },
-    // issuer: { type: String, required: true },
-    // stockExchange: { type: String, required: true },
-    // currency: { type: String, required: true },
-    // unit: { type: Number, required: true },
-    // closingPrice: { type: Number, required: true },
-    // priceClosingDate: { type: Date, required: true },
-    // maturityDate: { type: Date, required: true },
-    // coupon: [{ type: String }],
-    // riskLevel: { type: Number, enum: [1, 2, 3, 4, 5], required: true },
-    // riskLevelBrief: { type: String },
-    // riskLevelDescription: { type: String },
-    // status: { type: String, enum: ['PENDING', 'APPROVED', 'REJECTED'], default: 'PENDING' },
-    // createdByStaff: { type: Schema.Types.ObjectId, ref: 'Staff', default: null },
-    // decidedByStaff: { type: Schema.Types.ObjectId, ref: 'Staff', default: null },
-        securitySchemes: {
-            wa_auth: {
-                type: 'Bearer',
-                flow: {
-                    implicit: {
-                        authorizationUrl: '',
-                        scopes: {
-                            write: {
-                                admin: {
-                                    // 'Modify accpount'
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            // api_key: {
-            //     // type: apiKey,
-            //     name: api_key,
-            //     in: header
-            // }
+        }, 
+    },
+    securitySchemes: {
+        wealthAffairsAuth: {
+            type: "http",
+            scheme: "bearer",
+            bearerFormat: "JWT",
+            scopes: {
+                "read:data": "Read data",
+                "write:data": "Write data",
+                "delete:data": "Delete data",
+                "create:data": "Create data"
+            }
         }
-    }
+    },
 };
 
 module.exports = adminRoutesDocs;
+
+
+
+// bearerAuth: ['']
+//     investmentDisplayName: { type: String, required: true },
+// investmentName: { type: String, required: true },
+// primaryAssetType: { type: String, required: true },
+// secondaryAssetType: { type: String, default: '' },
+// industry: { type: String, required: true },
+// country: { type: String, required: true },
+// region: { type: String, required: true },
+// issuer: { type: String, required: true },
+// stockExchange: { type: String, required: true },
+// currency: { type: String, required: true },
+// unit: { type: Number, required: true },
+// closingPrice: { type: Number, required: true },
+// priceClosingDate: { type: Date, required: true },
+// maturityDate: { type: Date, required: true },
+// coupon: [{ type: String }],
+// riskLevel: { type: Number, enum: [1, 2, 3, 4, 5], required: true },
+// riskLevelBrief: { type: String },
+// riskLevelDescription: { type: String },
+// status: { type: String, enum: ['PENDING', 'APPROVED', 'REJECTED'], default: 'PENDING' },
+// createdByStaff: { type: Schema.Types.ObjectId, ref: 'Staff', default: null },
+// decidedByStaff: { type: Schema.Types.ObjectId, ref: 'Staff', default: null },

@@ -70,7 +70,8 @@ const options = {
             }
         ],
         paths: {...adminRoutesDocs},
-        components: {...adminRoutesDocs}
+        components: {...adminRoutesDocs},
+        security: {...adminRoutesDocs}
     },
     apis: ['./index.js', './routes/*.js']
 };
