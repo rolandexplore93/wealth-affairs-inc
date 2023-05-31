@@ -159,7 +159,7 @@ exports.editStaff =  async (req, res) => {
         const modifiedStaffInfo = {...req.body, role: role};
         const updateStaffInfo = await staff.findByIdAndUpdate(staffId, modifiedStaffInfo, { new: true }).select('-password');
         if (updateStaffInfo === null) return res.status(404).json({ message: 'Staff ID does not exists in the database' });
-        return res.status(204).json({ message: 'Profile updated.', updateStaffInfo });
+        return res.status(200).json({ message: 'Profile updated.', updateStaffInfo });
     } catch (error) {
         console.log(error.message);
         return res.status(500).json({ errorMessage: `Internal Server Error: ${error.message}` });
@@ -172,7 +172,7 @@ exports.deleteStaff =  async (req, res) => {
     if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Sorry, only Admin can access this page' });
     try {
         const staffId = req.params.id;
-        if (!mongoose.Types.ObjectId.isValid(staffId)) return res.status(404).json({ message: 'Invalid ID' });
+        if (!mongoose.Types.ObjectId.isValid(staffId)) return res.status(400).json({ message: 'Invalid ID' });
         const deleteStaffProfile = await staff.findByIdAndDelete(staffId);
         if (deleteStaffProfile === null) return res.status(404).json({ message: 'Staff profile does not exists in the database' });
         return res.status(200).json({ message: 'Staff account deleted!' });
@@ -203,7 +203,7 @@ exports.getClientById =  async (req, res) => {
     try {
         const clientId = req.params.id;
         // Check if the client id is valid before interacting with the database
-        if (!mongoose.Types.ObjectId.isValid(clientId)) return res.status(404).json({ message: 'Invalid Client ID'});
+        if (!mongoose.Types.ObjectId.isValid(clientId)) return res.status(400).json({ message: 'Invalid Client ID'});
         const clientInfo = await clients.findById(clientId).select('-password');
         if (!clientInfo) return res.status(404).json({message: 'Client not found!'});
         return res.status(200).json({ clientInfo });
@@ -225,7 +225,7 @@ exports.editClient =  async (req, res) => {
         console.log(error.message);
         return res.status(500).json({ errorMessage: `Internal Server Error: ${error.message}` });
     }
-}
+};
 
 // Delete client
 exports.deleteClient =  async (req, res) => {
@@ -234,7 +234,7 @@ exports.deleteClient =  async (req, res) => {
     try {
         const clientId = req.params.id;
         // Check if the client id is valid before interacting with the database
-        if (!mongoose.Types.ObjectId.isValid(clientId)) return res.status(404).json({ message: 'Invalid Client ID'});
+        if (!mongoose.Types.ObjectId.isValid(clientId)) return res.status(400).json({ message: 'Invalid Client ID'});
         const deleteClientProfile = await clients.findByIdAndDelete(clientId);
         if (deleteClientProfile === null) return res.status(404).json({ message: 'Client profile does not exists in the database' });
         return res.status(200).json({ message: 'Client account has been deleted!' });
@@ -242,4 +242,4 @@ exports.deleteClient =  async (req, res) => {
         console.log(error.message);
         return res.status(500).json({ errorMessage: `Internal Server Error: ${error.message}` });
     }
-}
+};

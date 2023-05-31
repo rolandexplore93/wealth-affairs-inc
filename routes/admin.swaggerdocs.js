@@ -238,7 +238,7 @@ const editStaff = {
         required: true
     },
     responses: {
-        204: {
+        200: {
             description: 'Successful operation',
             content: {
                 'application/json': {
@@ -285,6 +285,71 @@ const editStaff = {
             wealthAffairsAuth: [
                 "read:data", 
                 "write:data", 
+            ]
+        }
+    ]
+};
+
+const deleteStaff = {
+    tags: ['Admin'],
+    summary: 'Delete a staff',
+    description: 'Delete a staff by ID',
+    operationId: 'deleteStaff',
+    parameters: [
+        {
+            name: 'staffId',
+            in: 'path',
+            description: 'Id of the staff to delete',
+            required: true,
+            schema: {
+                type: 'string',
+                example: '645bc9f1862a73aace1c5dde'
+            }
+        }
+    ],
+    responses: {
+        200: {
+            description: 'Successful operation',
+            content: {
+                'application/json': {
+                    schema: {
+                        type: 'object',
+                        example: {
+                            staffInfo: [
+                                {
+                                    "_id": "645bc9f1862a73aace1c5dde",
+                                    "firstname": "Oroland",
+                                    "middlename": "RollyJS",
+                                    "lastname": "Oguns",
+                                    "email": "oro210@wealthaffairs.com",
+                                    "phoneNo": "0748956210",
+                                    "role": "Relationship Manager",
+                                    "creator": "Admin",
+                                }
+                            ]
+                        },
+                    },
+                }
+            }
+        },
+        400: {
+            description: 'Invalid Staff ID',
+        },
+        401: {
+            description: 'Not authorized',
+        },
+        404: {
+            description: 'Staff not found',
+        },
+        500: {
+            description: 'Internal server error',
+        }
+    },
+    security: [
+        {
+            wealthAffairsAuth: [
+                "read:data", 
+                "delete:data"
             ]
         }
     ]
@@ -346,6 +411,197 @@ const getClients = {
     ]
 };
 
+const getClientById = {
+    tags: ['Admin'],
+    summary: 'Get a client details by ID',
+    description: 'Get a client details',
+    operationId: 'getClientById',
+    parameters: [
+        {
+            name: 'clientId',
+            in: 'path',
+            description: 'Id of the client to return',
+            required: true,
+            schema: {
+                type: 'string',
+                example: '645bc9f1862a73aace1c5dde'
+            }
+        }
+    ],
+    responses: {
+        200: {
+            description: 'Successful operation',
+            content: {
+                'application/json': {
+                    schema: {
+                        type: 'object',
+                        example: {
+                            staffInfo: [
+                                {
+                                    "_id": "645bc9f1862a73aace1c5dde",
+                                    "firstname": "Client information",
+                                    // "middlename": "RollyJS",
+                                    // "lastname": "Oguns",
+                                    // "email": "oro210@wealthaffairs.com",
+                                    // "phoneNo": "0748956210",
+                                    // "role": "Relationship Manager",
+                                    // "creator": "Admin",
+                                }
+                            ]
+                        },
+                    },
+                }
+            }
+        },
+        400: {
+            description: 'Invalid Client ID',
+        },
+        401: {
+            description: 'Not authorized',
+        },
+        404: {
+            description: 'Client not found',
+        },
+        500: {
+            description: 'Internal server error',
+        }
+    },
+    security: [
+        {
+            wealthAffairsAuth: [
+                "read:data", 
+            ]
+        }
+    ]
+};
+
+const editClient = {
+    tags: ['Admin'],
+    summary: 'Update client',
+    description: 'Admin can modify client data only when they are logged in',
+    operationId: 'editClient',
+    parameters: [
+        {
+            name: 'clientId',
+            in: 'path',
+            description: 'Id of the client to update',
+            required: true,
+            schema: {
+                type: 'string',
+                example: '645bc9f1862a73aace1c5dde'
+            }
+        }
+    ],
+    requestBody: {
+        description: 'Update an existing client profile',
+        content: {
+            'application/json': {
+                schema: {
+                    $ref: '#components/schemas/client'
+                }
+            }
+        },
+        required: true
+    },
+    responses: {
+        200: {
+            description: 'Successful operation',
+            content: {
+                'application/json': {
+                    schema: {
+                        type: 'object',
+                        example: {
+                            message: "Client profile updated successfully.",
+                            profileUpdated: [
+                                {
+                                    "_id": "645bc9f1862a73aace1c5dde",
+                                    "firstname": "client details",
+                                    // "middlename": "RollyJS",
+                                    // "lastname": "Oguns",
+                                    // "email": "oro210@wealthaffairs.com",
+                                    // "phoneNo": "0748956210",
+                                    // "role": "Relationship Manager",
+                                    // "creator": "Admin",
+                                }
+                            ]
+                        },
+                    },
+                },
+            },
+        },
+        400: {
+            description: 'Invalid Client ID',
+        },
+        401: {
+            description: 'Not authorized',
+        },
+        404: {
+            description: 'Client ID does not exist',
+        },
+        409: {
+            description: 'Conflict: Email or phone number already exists',
+        },
+        500: {
+            description: 'Internal server error',
+        }
+    },
+    security: [
+        {
+            wealthAffairsAuth: [
+                "read:data", 
+                "write:data", 
+            ]
+        }
+    ]
+};
+
+const deleteClient = {
+    tags: ['Admin'],
+    summary: 'Delete a client',
+    description: 'Delete a client by ID',
+    operationId: 'deleteClient',
+    parameters: [
+        {
+            name: 'clientId',
+            in: 'path',
+            description: 'Id of the client to delete',
+            required: true,
+            schema: {
+                type: 'string',
+                example: '645bc9f1862a73aace1c5dde'
+            }
+        }
+    ],
+    responses: {
+        200: {
+            description: 'Successful operation',
+        },
+        400: {
+            description: 'Invalid Client ID',
+        },
+        401: {
+            description: 'Not authorized',
+        },
+        404: {
+            description: 'Client not found',
+        },
+        500: {
+            description: 'Internal server error',
+        }
+    },
+    security: [
+        {
+            wealthAffairsAuth: [
+                "read:data", 
+                "delete:data"
+            ]
+        }
+    ]
+};
+
+
+
+
 const adminRoutesDocs = {
     '/login/admin': {
         post: adminLogin,
@@ -356,12 +612,18 @@ const adminRoutesDocs = {
     '/auth/staff': {
         get: getAllStaff,
     },
-    '/auth/staff/{id}': {
+    '/auth/staff/{staffId}': {
         get: getStaffById,
-        patch: editStaff
+        patch: editStaff,
+        delete: deleteStaff
     },
     '/auth/clients': {
         get: getClients
+    },
+    '/auth/clients/{clientId}': {
+        get: getClientById,
+        patch: editClient,
+        delete: deleteClient
     },
 
     // Components configuration
