@@ -20,7 +20,7 @@ exports.loginAdmin = async (req, res) => {
     const uname = username.toLowerCase();
     try {
         if (uname === configAdmin.username && password === configAdmin.password){
-            const loginToken = await jwt.sign({ _id: configAdmin.id, username: configAdmin.username }, process.env.SECRETJWT, { expiresIn: '180s' });
+            const loginToken = await jwt.sign({ _id: configAdmin.id, username: configAdmin.username }, process.env.SECRETJWT, { expiresIn: '1h' });
             res.set('Authorization', `Bearer ${loginToken}`);
             // Set login token in client-side cookies as HTTP-only cookie
             // res.cookie('authToken', loginToken, { httpOnly: true });
@@ -45,7 +45,7 @@ exports.createStaffUser = async (req, res) => {
     if (role === 'FA') role = 'Fund Administrator';
     else if (role === 'FC') role = 'Fund Controller';
     else if (role === 'RM') role = 'Relationship Manager';
-    else return res.status(404).json({ message: 'Role Not Assigned'});
+    else return res.status(404).json({ message: 'Staff role is not assigned'});
 
 
     // Generate email for staff
@@ -105,7 +105,7 @@ exports.createStaffUser = async (req, res) => {
         console.log(error.message);
         return res.status(500).json({ errorMessage: error.message })
     }
-}
+};
 
 // View all staff users
 exports.getAllStaff =  async (req, res) => {
@@ -149,7 +149,7 @@ exports.editStaff =  async (req, res) => {
     if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Sorry, only Admin can access this page' });
     try {
         const staffId = req.params.id;
-        if (!mongoose.Types.ObjectId.isValid(staffId)) return res.status(404).json({ message: 'Invalid ID' })
+        if (!mongoose.Types.ObjectId.isValid(staffId)) return res.status(400).json({ message: 'Invalid ID' })
 
         if (req.body.role === 'FA') role = 'Fund Administrator';
         else if (req.body.role === 'FC') role = 'Fund Controller';
@@ -159,7 +159,7 @@ exports.editStaff =  async (req, res) => {
         const modifiedStaffInfo = {...req.body, role: role};
         const updateStaffInfo = await staff.findByIdAndUpdate(staffId, modifiedStaffInfo, { new: true }).select('-password');
         if (updateStaffInfo === null) return res.status(404).json({ message: 'Staff ID does not exists in the database' });
-        return res.status(200).json({ message: 'Profile updated.', updateStaffInfo });
+        return res.status(204).json({ message: 'Profile updated.', updateStaffInfo });
     } catch (error) {
         console.log(error.message);
         return res.status(500).json({ errorMessage: `Internal Server Error: ${error.message}` });

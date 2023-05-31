@@ -32,9 +32,265 @@ const adminLogin = {
         401: { description: 'Invalid credentials. Please, enter correct username and password.' },
         500: { description: 'Server error. Please try again.' }
     }
+};
+
+const createStaffUser = {
+    tags: ['Admin'],
+    summary: 'Create staff (FA, FC, RM) account',
+    description: 'Create staff account',
+    operationId: 'createStaffUser',
+    requestBody: {
+        description: 'Create a new staff profile',
+        content: {
+            'application/json': {
+                schema: {
+                    $ref: '#components/schemas/staff'
+                }
+            }
+        },
+        required: true
+    },
+    responses: {
+        200: {
+            description: 'Successful operation',
+            content: {
+                'application/json': {
+                    schema: {
+                        type: 'object',
+                        example: {
+                            message: "Staff created successfully.",
+                            password: 'staffPassword (Note: When live, only authorised admin can create staff user and receive the auto generated password and email. This is revealed for testing purpose).',
+                            staffAddedToDb: [
+                                {
+                                    "_id": "645bc9f1862a73aace1c5dde",
+                                    "firstname": "Oroland",
+                                    "middlename": "RollyJS",
+                                    "lastname": "Oguns",
+                                    "email": "oro210@wealthaffairs.com",
+                                    "phoneNo": "0748956210",
+                                    "role": "Relationship Manager",
+                                    "creator": "Admin",
+                                }
+                            ]
+                        },
+                    },
+                },
+            },
+        },
+        404: {
+            description: 'Staff role is not assigned',
+        },
+        409: {
+            description: 'Conflict: Email or phone number already exists',
+        },
+        500: {
+            description: 'Internal server error',
+        }
+    },
+    security: [
+        {
+            wealthAffairsAuth: [
+                "create:data", 
+                // "read:data", 
+                // "write:data", 
+                // "delete:data"
+            ]
+        }
+    ]
+};
+
+const getAllStaff = {
+    tags: ['Admin'],
+    summary: 'list all staff users',
+    description: 'List all staff',
+    operationId: 'getAllStaff',
+    responses: {
+        200: {
+            description: 'Successful operation',
+            content: {
+                'application/json': {
+                    schema: {
+                        type: 'object',
+                        example: {
+                            message: "Staff list displayed below",
+                            staffList: [
+                                {
+                                "_id": "64566f",
+                                "firstname": "Orobola",
+                                "middlename": "Roland",
+                                "lastname": "Ogundipe",
+                                "email": "oro621@wealthaffairs.com",
+                                "phoneNo": "074895621",
+                                "role": "Relationship Manager",
+                                "creator": "Admin",
+                                "createdAt": "2023-05-06T15:17:28.148Z",
+                                "updatedAt": "2023-05-06T18:23:46.456Z",
+                                }
+                            ]
+                        },
+                    },
+                }
+            }
+        },
+        500: {
+            description: 'Internal server error',
+        }
+    },
+    security: [
+        {
+            wealthAffairsAuth: [
+                "read:data", 
+            ]
+        }
+    ]
+};
+
+const getStaffById = {
+    tags: ['Admin'],
+    summary: 'Get a staff details by ID',
+    description: 'Get a staff details',
+    operationId: 'getStaffById',
+    parameters: [
+        {
+            name: 'staffId',
+            in: 'path',
+            description: 'Id of the staff to return',
+            required: true,
+            schema: {
+                type: 'string',
+                example: '645bc9f1862a73aace1c5dde'
+            }
+        }
+    ],
+    responses: {
+        200: {
+            description: 'Successful operation',
+            content: {
+                'application/json': {
+                    schema: {
+                        type: 'object',
+                        example: {
+                            staffInfo: [
+                                {
+                                    "_id": "645bc9f1862a73aace1c5dde",
+                                    "firstname": "Oroland",
+                                    "middlename": "RollyJS",
+                                    "lastname": "Oguns",
+                                    "email": "oro210@wealthaffairs.com",
+                                    "phoneNo": "0748956210",
+                                    "role": "Relationship Manager",
+                                    "creator": "Admin",
+                                }
+                            ]
+                        },
+                    },
+                }
+            }
+        },
+        400: {
+            description: 'Invalid Staff ID',
+        },
+        401: {
+            description: 'Not authorized',
+        },
+        404: {
+            description: 'Staff not found',
+        },
+        500: {
+            description: 'Internal server error',
+        }
+    },
+    security: [
+        {
+            wealthAffairsAuth: [
+                "read:data", 
+            ]
+        }
+    ]
+};
+
+const editStaff = {
+    tags: ['Admin'],
+    summary: 'Update staff',
+    description: 'Admin can modify staff data only when they are logged in',
+    operationId: 'editStaff',
+    parameters: [
+        {
+            name: 'staffId',
+            in: 'path',
+            description: 'Id of the staff to update',
+            required: true,
+            schema: {
+                type: 'string',
+                example: '645bc9f1862a73aace1c5dde'
+            }
+        }
+    ],
+    requestBody: {
+        description: 'Update an existing staff profile',
+        content: {
+            'application/json': {
+                schema: {
+                    $ref: '#components/schemas/staff'
+                }
+            }
+        },
+        required: true
+    },
+    responses: {
+        204: {
+            description: 'Successful operation',
+            content: {
+                'application/json': {
+                    schema: {
+                        type: 'object',
+                        example: {
+                            message: "Staff created successfully.",
+                            password: 'staffPassword (Note: When live, only authorised admin can create staff user and receive the auto generated password and email. This is revealed for testing purpose).',
+                            staffAddedToDb: [
+                                {
+                                    "_id": "645bc9f1862a73aace1c5dde",
+                                    "firstname": "Oroland",
+                                    "middlename": "RollyJS",
+                                    "lastname": "Oguns",
+                                    "email": "oro210@wealthaffairs.com",
+                                    "phoneNo": "0748956210",
+                                    "role": "Relationship Manager",
+                                    "creator": "Admin",
+                                }
+                            ]
+                        },
+                    },
+                },
+            },
+        },
+        400: {
+            description: 'Invalid Staff ID',
+        },
+        401: {
+            description: 'Not authorized',
+        },
+        404: {
+            description: 'Staff ID does not exist',
+        },
+        409: {
+            description: 'Conflict: Email or phone number already exists',
+        },
+        500: {
+            description: 'Internal server error',
+        }
+    },
+    security: [
+        {
+            wealthAffairsAuth: [
+                "read:data", 
+                "write:data", 
+            ]
+        }
+    ]
 }
 
-const listClients = {
+const getClients = {
     tags: ['Admin'],
     summary: 'Get a list of all clients',
     description: 'List all registered clients',
@@ -90,223 +346,24 @@ const listClients = {
     ]
 };
 
-const listStaff = {
-    tags: ['Admin'],
-    summary: 'list all staff users',
-    description: 'List all staff',
-    operationId: 'getAllStaff',
-    responses: {
-        200: {
-            description: 'Ok',
-            content: {
-                'application/json': {
-                    schema: {
-                        type: 'object',
-                        example: {
-                            message: "Staff list displayed below",
-                            staffList: [
-                                {
-                                "_id": "64566f",
-                                "firstname": "Orobola",
-                                "middlename": "Roland",
-                                "lastname": "Ogundipe",
-                                "email": "oro621@wealthaffairs.com",
-                                "phoneNo": "074895621",
-                                "role": "Relationship Manager",
-                                "creator": "Admin",
-                                "createdAt": "2023-05-06T15:17:28.148Z",
-                                "updatedAt": "2023-05-06T18:23:46.456Z",
-                                }
-                            ]
-                        },
-                    },
-                }
-            }
-        },
-        500: {
-            description: 'Internal server error',
-        }
-    },
-    security: [
-        {
-            wealthAffairsAuth: [
-                "read:data", 
-                "write:data", 
-                "delete:data"
-            ]
-        }
-    ]
-};
-
-const createUser = {
-    tags: ['Admin'],
-    summary: 'Create staff (FA, FC, RM) account',
-    description: 'Create staff account',
-    operationId: 'createUser',
-    requestBody: {
-        description: 'Create a new staff profile',
-        content: {
-            'application/json': {
-                schema: {
-                    $ref: '#components/schemas/staff'
-                    // type: 'object',
-                    // properties: {
-                    //     firstname: {
-                    //         type: 'string',
-                    //         description: 'Firstname of the staff',
-                    //         example: 'Oroland'
-                    //     },
-                    //     middlename: {
-                    //         type: 'string',
-                    //         description: 'Middlename of the staff',
-                    //         example: 'RollyJS'
-                    //     },
-                    //     lastname: {
-                    //         type: 'string',
-                    //         description: 'Lastname of the staff',
-                    //         example: 'Oguns'
-                    //     },
-                    //     phoneno: {
-                    //         type: 'string',
-                    //         description: 'Staff phone number',
-                    //         example: '02458612621'
-                    //     },
-                    //     role: {
-                    //         type: 'string',
-                    //         description: 'Staff role, whether FA, FC or RM',
-                    //         example: 'RM'
-                    //     },
-                    // }
-                }
-            }
-        },
-        required: true
-    },
-    responses: {
-        200: {
-            description: 'Successful operation',
-            content: {
-                'application/json': {
-                    schema: {
-                        type: 'object',
-                        example: {
-                            message: "Staff created successfully.",
-                            password: 'staffPassword (Note: When live, only authorised admin can create staff user and receive the auto generated password and email. This is revealed for testing purpose).',
-                            staffAddedToDb: [
-                                {
-                                    "_id": "645bc9f1862a73aace1c5dde",
-                                    "firstname": "Oroland",
-                                    "middlename": "RollyJS",
-                                    "lastname": "Oguns",
-                                    "email": "oro210@wealthaffairs.com",
-                                    "phoneNo": "0748956210",
-                                    "role": "Relationship Manager",
-                                    "creator": "Admin",
-                                }
-                            ]
-                        },
-                    },
-                },
-            },
-        },
-        409: {
-            description: 'Conflict: Email or phone number already exists',
-        },
-        500: {
-            description: 'Internal server error',
-        }
-    },
-    security: [
-        {
-            wealthAffairsAuth: [
-                "create:data", 
-                // "read:data", 
-                // "write:data", 
-                // "delete:data"
-            ]
-        }
-    ]
-};
-
-const getStaffUserById = {
-    tags: ['Admin'],
-    summary: 'Get a staff details from path ID',
-    description: 'Get a staff details',
-    operationId: 'getUserById',
-    parameters: [
-        {
-            name: 'staffId',
-            in: 'path',
-            description: 'Id of the staff to return',
-            required: true,
-            schema: {
-                type: 'string',
-                example: '645bc9f1862a73aace1c5dde'
-            }
-        }
-    ],
-    responses: {
-        200: {
-            description: 'Ok',
-            content: {
-                'application/json': {
-                    schema: {
-                        type: 'object',
-                        example: {
-                            staffInfo: [
-                                {
-                                    "_id": "645bc9f1862a73aace1c5dde",
-                                    "firstname": "Oroland",
-                                    "middlename": "RollyJS",
-                                    "lastname": "Oguns",
-                                    "email": "oro210@wealthaffairs.com",
-                                    "phoneNo": "0748956210",
-                                    "role": "Relationship Manager",
-                                    "creator": "Admin",
-                                }
-                            ]
-                        },
-                    },
-                }
-            }
-        },
-        400: {
-            description: 'Invalid Staff ID',
-        },
-        404: {
-            description: 'Staff not found',
-        },
-        500: {
-            description: 'Internal server error',
-        }
-    },
-    security: [
-        {
-            wealthAffairsAuth: [
-                "read:data", 
-                // "write:data", 
-                // "delete:data"
-            ]
-        }
-    ]
-};
-
 const adminRoutesDocs = {
     '/login/admin': {
         post: adminLogin,
     },
-    '/auth/clients': {
-        get: listClients,
+    '/auth/register-staff': {
+        post: createStaffUser
     },
     '/auth/staff': {
-        get: listStaff,
+        get: getAllStaff,
     },
     '/auth/staff/{id}': {
-        get: getStaffUserById,
+        get: getStaffById,
+        patch: editStaff
     },
-    '/auth/register-staff': {
-        post: createUser
+    '/auth/clients': {
+        get: getClients
     },
+
     // Components configuration
     schemas: {
         admin: {
@@ -475,3 +532,36 @@ module.exports = adminRoutesDocs;
 // status: { type: String, enum: ['PENDING', 'APPROVED', 'REJECTED'], default: 'PENDING' },
 // createdByStaff: { type: Schema.Types.ObjectId, ref: 'Staff', default: null },
 // decidedByStaff: { type: Schema.Types.ObjectId, ref: 'Staff', default: null },
+
+
+// schema: {
+//     $ref: '#components/schemas/staff'
+//     // type: 'object',
+//     // properties: {
+//     //     firstname: {
+//     //         type: 'string',
+//     //         description: 'Firstname of the staff',
+//     //         example: 'Oroland'
+//     //     },
+//     //     middlename: {
+//     //         type: 'string',
+//     //         description: 'Middlename of the staff',
+//     //         example: 'RollyJS'
+//     //     },
+//     //     lastname: {
+//     //         type: 'string',
+//     //         description: 'Lastname of the staff',
+//     //         example: 'Oguns'
+//     //     },
+//     //     phoneno: {
+//     //         type: 'string',
+//     //         description: 'Staff phone number',
+//     //         example: '02458612621'
+//     //     },
+//     //     role: {
+//     //         type: 'string',
+//     //         description: 'Staff role, whether FA, FC or RM',
+//     //         example: 'RM'
+//     //     },
+//     // }
+// }
