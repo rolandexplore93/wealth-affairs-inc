@@ -8,11 +8,11 @@ exports.staffLogin = async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        if (!validate.isEmail(email)) return res.status(404).json({ message: 'Please enter a valid email address' });
+        if (!validate.isEmail(email)) return res.status(400).json({ message: 'Please enter a valid email address' });
         const staffList = await staff.findOne({ email });
         if (!staffList) return res.status(400).json({ message: 'User email does not exist.' });
         const staffPassword = await bcrypt.compare(password, staffList.password);
-        if (!staffPassword) return res.status(404).json({ message: 'Invalid login details'});
+        if (!staffPassword) return res.status(401).json({ message: 'Invalid login details'});
 
         let redirectionUrl;
         if (staffList.role === 'Fund Administrator'){

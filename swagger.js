@@ -2,29 +2,9 @@ const express = require('express');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const adminRoutesDocs = require('./routes/admin.swaggerdocs');
+const staffRoutesDoc = require('./routes/staff.swaggerdocs');
+const faRoutesDoc = require('./routes/fa.swaggerdocs');
 const router = express.Router();
-
-// const app = express();
-
-// const options = {
-//     definition: {
-//         openapi: '3.0.0',
-//         info: {
-//             title: 'Wealth Affairs Inc API',
-//             version: '1.0.0',
-//             description: 'Wealth Affairs API documentation'
-//         },
-//         servers: [
-//             {
-//                 url: 'http://localhost:3000',
-//             },
-//         ],
-//     },
-//     apis: ['./index.js', './routes/*.js']
-// };
-
-// const swaggerSpecs = swaggerJsdoc(options);
-// module.exports = { swaggerSpecs, swaggerUi };
 
 const options = {
     definition: {
@@ -53,6 +33,11 @@ const options = {
                 }
             },
             {
+                name: 'Staff',
+                description: 'Genration operations like login/logout that involve all the staff (FA, FC and RM)',
+                summary: 'thhhhe'
+            },
+            {
                 name: 'Fund Administrator',
                 description: 'Operations about Fund Admin user'
             },
@@ -69,9 +54,30 @@ const options = {
                 description: 'Operations about clients'
             }
         ],
-        paths: {...adminRoutesDocs},
-        components: {...adminRoutesDocs},
-        security: {...adminRoutesDocs}
+        paths: {...adminRoutesDocs, ...staffRoutesDoc, ...faRoutesDoc},
+        components: {
+            schemas: {
+                ...adminRoutesDocs.schemas, 
+                ...staffRoutesDoc.schemas,
+                ...faRoutesDoc.schemas
+            },
+            securitySchemes: {
+                wealthAffairsAuth: {
+                    type: "http",
+                    scheme: "bearer",
+                    bearerFormat: "JWT",
+                    scopes: {
+                        "read:data": "Read data",
+                        "write:data": "Write data",
+                        "delete:data": "Delete data",
+                        "create:data": "Create data"
+                    }
+                }
+            },
+        },
+        security: [{
+            // wealthAffairsAuth: []
+        }]
     },
     apis: ['./index.js', './routes/*.js']
 };

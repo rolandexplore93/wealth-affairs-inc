@@ -752,20 +752,7 @@ const adminRoutesDocs = {
                 },
             }
         }, 
-    },
-    securitySchemes: {
-        wealthAffairsAuth: {
-            type: "http",
-            scheme: "bearer",
-            bearerFormat: "JWT",
-            scopes: {
-                "read:data": "Read data",
-                "write:data": "Write data",
-                "delete:data": "Delete data",
-                "create:data": "Create data"
-            }
-        }
-    },
+    }
 };
 
 module.exports = adminRoutesDocs;

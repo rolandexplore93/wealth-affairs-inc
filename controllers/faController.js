@@ -66,7 +66,7 @@ exports.createInvestment = async (req, res) => {
         riskLevelDescription = 'Investors who hope to experience minimal fluctuations in portfolio value over a rolling one year period and are generally only willing to buy investments that are priced frequently and have a high certainty of being able to sell quickly (less than a week) at a price close to the recently observed market value.';
     } else if(riskLevel == 2) {
         riskLevelBrief = 'Suitable for conservative investors';
-        riskLevelfDescription = 'Investors who hope to experience no more than small portfolio losses over a rolling one-year period and are generally only willing to buy investments that are priced frequently and have a high certainty of being able to sell quickly (less than a week) although the investor may at times buy individual investments that entail greater risk.';
+        riskLevelDescription = 'Investors who hope to experience no more than small portfolio losses over a rolling one-year period and are generally only willing to buy investments that are priced frequently and have a high certainty of being able to sell quickly (less than a week) although the investor may at times buy individual investments that entail greater risk.';
     } else if(riskLevel == 3) {
         riskLevelBrief = 'Suitable for moderate investors';
         riskLevelDescription = 'Investors who hope to experience no more than moderate portfolio losses over a rolling one year period in attempting to enhance longer-term performance and are generally willing to buy investments that are priced frequently and have a high certainty of being able to sell quickly (less than a week) in stable markets although the investor may at times buy individual investments that entail greater risk and are less liquid.';
@@ -100,7 +100,7 @@ exports.createInvestment = async (req, res) => {
 exports.allInvestments = async (req, res) => {
     try {
         const investments = await investment.find();
-        if (!investments) return res.status(400).json({ message: `No Investment Found.` })
+        if (!investments) return res.status(404).json({ message: `No Investment Found.` })
         return res.status(200).json({ investments })
     } catch (error) {
         return res.status(500).json({ message: error.message});
@@ -111,7 +111,7 @@ exports.allInvestments = async (req, res) => {
 exports.approvedInvestments = async (req, res) => {
     try {
         const approvedInvestments = await investment.findOne({ status: 'APPROVED'});
-        if (!approvedInvestments) return res.status(400).json({ message: `No Approved Investment Found.` })
+        if (!approvedInvestments) return res.status(404).json({ message: `No Approved Investment Found.` })
         return res.status(200).json({ approvedInvestments })
     } catch (error) {
         return res.status(500).json({ message: error.message});
@@ -122,7 +122,7 @@ exports.approvedInvestments = async (req, res) => {
 exports.pendingInvestments = async (req, res) => {
     try {
         const pendingInvestments = await investment.findOne({ status: 'PENDING'});
-        if (!pendingInvestments) return res.status(400).json({ message: `No Pending Investment Found.` })
+        if (!pendingInvestments) return res.status(404).json({ message: `No Pending Investment Found.` })
         return res.status(200).json({ pendingInvestments })
     } catch (error) {
         return res.status(500).json({ message: error.message});
@@ -133,7 +133,7 @@ exports.pendingInvestments = async (req, res) => {
 exports.rejectedInvestments = async (req, res) => {
     try {
         const rejectedInvestments = await investment.findOne({ status: 'REJECTED'});
-        if (!rejectedInvestments) return res.status(400).json({ message: `No Rejected Investment Found.` })
+        if (!rejectedInvestments) return res.status(404).json({ message: `No Rejected Investment Found.` })
         return res.status(200).json({ rejectedInvestments })
     } catch (error) {
         return res.status(500).json({ message: error.message});
@@ -146,7 +146,7 @@ exports.viewTargetInvestment = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(investmentId)) return res.status(404).json({ message: 'Invalid ID' });
     try {
         const investments = await investment.findById(investmentId);
-        if (!investments) return res.status(400).json({ message: `No Investment Found.` })
+        if (!investments) return res.status(404).json({ message: `No Investment Found.` })
         return res.status(200).json({ investments })
     } catch (error) {
         return res.status(500).json({ message: error.message});
@@ -168,7 +168,7 @@ exports.editInvestment = async (req, res) => {
         riskLevelDescription = 'Investors who hope to experience minimal fluctuations in portfolio value over a rolling one year period and are generally only willing to buy investments that are priced frequently and have a high certainty of being able to sell quickly (less than a week) at a price close to the recently observed market value.';
     } else if(riskLevel == 2) {
         riskLevelBrief = 'Suitable for conservative investors';
-        riskLevelfDescription = 'Investors who hope to experience no more than small portfolio losses over a rolling one-year period and are generally only willing to buy investments that are priced frequently and have a high certainty of being able to sell quickly (less than a week) although the investor may at times buy individual investments that entail greater risk.';
+        riskLevelDescription = 'Investors who hope to experience no more than small portfolio losses over a rolling one-year period and are generally only willing to buy investments that are priced frequently and have a high certainty of being able to sell quickly (less than a week) although the investor may at times buy individual investments that entail greater risk.';
     } else if(riskLevel == 3) {
         riskLevelBrief = 'Suitable for moderate investors';
         riskLevelDescription = 'Investors who hope to experience no more than moderate portfolio losses over a rolling one year period in attempting to enhance longer-term performance and are generally willing to buy investments that are priced frequently and have a high certainty of being able to sell quickly (less than a week) in stable markets although the investor may at times buy individual investments that entail greater risk and are less liquid.';
