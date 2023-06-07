@@ -76,7 +76,7 @@ const options = {
             },
         },
         security: [{
-            // wealthAffairsAuth: []
+            // wealthAffairsAuth: [] // Apply security to all routes
         }]
     },
     apis: ['./index.js', './routes/*.js']
