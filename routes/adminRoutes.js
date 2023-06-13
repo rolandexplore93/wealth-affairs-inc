@@ -4,7 +4,8 @@ const adminController = require('../controllers/adminController');
 const updateSchemaController = require('../controllers/updateSchemaController');
 const { authorise } = require('../controllers/authorise');
 
-adminRouter.post('/login/admin', adminController.loginAdmin);
+adminRouter.post('/loginAdmin', adminController.loginAdmin);
+adminRouter.get('/logoutAdmin', adminController.logoutAdmin);
 adminRouter.post('/auth/register-staff', authorise, adminController.createStaffUser);
 adminRouter.get('/auth/staff', authorise, adminController.getAllStaff);
 adminRouter.get('/auth/staff/:id', authorise, adminController.getStaffById);

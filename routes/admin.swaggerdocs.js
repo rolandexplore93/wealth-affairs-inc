@@ -1,4 +1,4 @@
-const adminLogin = {
+const loginAdmin = {
     tags: ['Admin'],
     summary: 'Authenticate admin into the system',
     description: 'Admin is authenticated to perform designated activities',
@@ -32,6 +32,15 @@ const adminLogin = {
         401: { description: 'Invalid credentials. Please, enter correct username and password.' },
         500: { description: 'Server error. Please try again.' }
     }
+};
+
+const logoutAdmin = {
+    tags: ['Admin'],
+    summary: 'Logout admin',
+    description: 'This endpoint logs admin out of the platform',
+    operationId: 'logoutAdmin',
+    requestBody: {},
+
 };
 
 const createStaffUser = {
@@ -603,8 +612,11 @@ const deleteClient = {
 
 
 const adminRoutesDocs = {
-    '/login/admin': {
-        post: adminLogin,
+    '/loginAdmin': {
+        post: loginAdmin,
+    },
+    '/logoutAdmin': {
+        post: logoutAdmin
     },
     '/auth/register-staff': {
         post: createStaffUser

@@ -32,6 +32,16 @@ exports.loginAdmin = async (req, res) => {
         console.log(error.message);
         res.status(500).json({ errorMessage: 'Server Error. Please try again.' })
     }
+};
+
+// Admin logout
+exports.logoutAdmin = async (req, res) => {
+    res.removeHeader('Authorization'); // This will clear the token in authorization header if response header is used to store the login token
+    // res.clearCookie('authToken'); // if cookie is used to store the login token
+
+    res.status(200).json({ message: 'You are now logged out.' })
+    // redirect admin to login page
+    // res.redirect('/loginAdmin')
 }
 
 // Create staff user
