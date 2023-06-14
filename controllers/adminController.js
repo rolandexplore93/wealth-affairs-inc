@@ -40,8 +40,7 @@ exports.logoutAdmin = async (req, res) => {
     // res.clearCookie('authToken'); // if cookie is used to store the login token
 
     res.status(200).json({ message: 'You are now logged out.' })
-    // redirect admin to login page
-    // res.redirect('/loginAdmin')
+    // res.redirect('/loginAdmin')  // redirect admin to login page  
 }
 
 // Create staff user
