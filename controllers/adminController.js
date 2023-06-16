@@ -5,6 +5,15 @@ const bcrypt = require('bcrypt');
 const staff = require('../models/staff');
 const clients = require('../models/client');
 const jwt = require('jsonwebtoken');
+const redis = require('redis'); 
+const util = require('util');
+
+// Initialize redis port
+const REDIS_PORT = process.env.PORT || 6379;
+const client = redis.createClient(REDIS_PORT);
+client.set = util.promisify(client.set)
+client.get = util.promisify(client.get)
+
 
 let crypto;
 crypto = require('node:crypto'); // For randam generation of bytes
@@ -17,28 +26,47 @@ try {
 // Admin login
 exports.loginAdmin = async (req, res) => {
     const { username, password } = req.body;
-    const uname = username.toLowerCase();
+    const usernameInLowerCase = username.toLowerCase();
     try {
-        if (uname === configAdmin.username && password === configAdmin.password){
-            const loginToken = await jwt.sign({ _id: configAdmin.id, username: configAdmin.username }, process.env.SECRETJWT, { expiresIn: '1h' });
+        if (usernameInLowerCase === configAdmin.username && password === configAdmin.password){
+            const loginToken = await jwt.sign({ _id: configAdmin.id, username: configAdmin.username, name: configAdmin.name }, process.env.SECRETJWT, { expiresIn: '30s' });
             res.set('Authorization', `Bearer ${loginToken}`);
             // Set login token in client-side cookies as HTTP-only cookie
             // res.cookie('authToken', loginToken, { httpOnly: true });
-            res.status(200).json({ message: 'Login successful...', loginToken });
+
+            // redisClient.set('admin-token', loginToken, "EX", 10) // Store the token in Redis
+            client.set(`${configAdmin.id}`, JSON.stringify(loginToken), 'EX', 30);
+            return res.status(200).json({ success: true, message: 'Login successful...', loginToken });
         } else {
-            res.status(401).json({ message: 'Invalid credentials. Please, enter correct username and password.' })
+            res.status(401).json({ success: false, message: 'Invalid credentials. Please, enter correct username and password.' })
         }
     } catch (error) {
         console.log(error.message);
-        res.status(500).json({ errorMessage: 'Server Error. Please try again.' })
+        res.status(500).json({ success: false, errorMessage: 'Server Error. Please try again.' });
     }
 };
+
+// Cached middleware
+// To use the cache middlwware, pass it as a second parameter inside the routes call
+function cache(req, res, next){
+    const {username } = req.params;
+    client.get(username, (err, data) => {
+        if (err) throw err;
+
+        if (data !== null){
+            // res.send(setResponse(username,data))
+            res.send("Data")
+        } else {
+            next();
+        }
+    })
+}
 
 // Admin logout
 exports.logoutAdmin = async (req, res) => {
     res.removeHeader('Authorization'); // This will clear the token in authorization header if response header is used to store the login token
     // res.clearCookie('authToken'); // if cookie is used to store the login token
-
+    // client.del('admin-token');
     res.status(200).json({ message: 'You are now logged out.' })
     // res.redirect('/loginAdmin')  // redirect admin to login page  
 }
