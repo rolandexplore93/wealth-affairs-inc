@@ -4,6 +4,7 @@ const adminController = require('../controllers/adminController');
 const updateSchemaController = require('../controllers/updateSchemaController');
 const { authorise } = require('../controllers/authorise');
 
+adminRouter.post('/grant-admin-access', adminController.grantLoginAccessToAdmin);
 adminRouter.post('/loginAdmin', adminController.loginAdmin);
 adminRouter.post('/logoutAdmin', authorise, adminController.logoutAdmin);
 adminRouter.post('/auth/register-staff', authorise, adminController.createStaffUser);

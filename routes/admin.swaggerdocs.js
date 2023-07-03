@@ -1,3 +1,44 @@
+const grantLoginAccessToAdmin = {
+    tags: ['Admin'],
+    summary: 'Grant access to admin login page',
+    description: 'Admin is granted access to the login page',
+    operationId: 'grantLoginAccessToAdmin',
+    requestBody: {
+        description: 'Enter your access code',
+        content: {
+            'application/json': {
+                schema: {
+                    type: 'object',
+                    properties: {
+                        accessCode: { type: 'string', example: 'hdnn1024e7' }
+                    }
+                },
+            },
+        },
+        required: true
+    },
+    responses: {
+        200: {
+            description: 'Ok',
+            content: {
+                'application/json': {
+                    schema: {
+                        type: 'object',
+                        example: {
+                            redirectUrl: 'http://localhost:3000/loginAdmin', 
+                            message: 'Access code is valid',  
+                            success: true
+                        }
+                    }
+                }
+            }
+        },
+        302: { description: 'Found. Redirecting to /adminlogin'},  
+        400: { description: 'Incorrect access code. Please, try again.', success: false },
+        500: { description: 'Server error. Please try again.' }
+    }
+};
+
 const loginAdmin = {
     tags: ['Admin'],
     summary: 'Authenticate admin into the system',
@@ -610,8 +651,10 @@ const deleteClient = {
 
 
 
-
 const adminRoutesDocs = {
+    '/grant-admin-access': {
+        post: grantLoginAccessToAdmin
+    },
     '/loginAdmin': {
         post: loginAdmin,
     },
@@ -640,6 +683,13 @@ const adminRoutesDocs = {
 
     // Components configuration
     schemas: {
+        grantAdminAccess: {
+            required: ['accessCode'],
+            type: 'object',
+            properties: {
+                accessCode: { type: 'string', example: 'hdnn1024e7' }
+            }
+        },
         admin: {
             required: ['username', 'password'],
             type: 'object',

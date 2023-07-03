@@ -20,7 +20,7 @@ const options = {
             version: '1.0.0',
         },
         servers: [
-            { url: 'http://localhost:3000' }, // testing
+            // { url: 'http://localhost:3000' }, // testing
             { url: 'https://wealth-affairs.onrender.com' } // production
         ],
         tags: [

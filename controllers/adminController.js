@@ -9,18 +9,35 @@ const redis = require('redis');
 const util = require('util');
 
 // Initialize redis port
-const REDIS_PORT = process.env.PORT || 6379;
-const client = redis.createClient(REDIS_PORT);
-client.set = util.promisify(client.set)
-client.get = util.promisify(client.get)
+// const REDIS_PORT = process.env.PORT || 6379;
+// const client = redis.createClient(REDIS_PORT);
+// client.set = util.promisify(client.set)
+// client.get = util.promisify(client.get)
 
 
 let crypto;
 crypto = require('node:crypto'); // For randam generation of bytes
 try {
-//   console.log(crypto)
+    //   console.log(crypto)
 } catch (err) {
   console.error('crypto support is disabled!');
+}
+
+// grant-admin-access
+exports.grantLoginAccessToAdmin = async (req, res) => {
+    const { accessCode } = req.body;
+    console.log(accessCode)
+    try {
+        if (accessCode === configAdmin.accessCode){
+            res.status(200).json({ redirectUrl: 'http://localhost:3000/loginAdmin', message: 'Access code is valid',  success: true });
+            // Route user to login page
+            // res.redirect(301, 'http://localhost:3000/loginAdmin');
+        } else {
+            res.status(400).json({ message: 'Incorrect access code. Please, try again!', success: false })
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message, success: false })
+    }
 }
 
 // Admin login
@@ -35,7 +52,7 @@ exports.loginAdmin = async (req, res) => {
             // res.cookie('authToken', loginToken, { httpOnly: true });
 
             // redisClient.set('admin-token', loginToken, "EX", 10) // Store the token in Redis
-            client.set(`${configAdmin.id}`, JSON.stringify(loginToken), 'EX', 30);
+            // client.set(`${configAdmin.id}`, JSON.stringify(loginToken), 'EX', 30);
             return res.status(200).json({ success: true, message: 'Login successful...', loginToken });
         } else {
             res.status(401).json({ success: false, message: 'Invalid credentials. Please, enter correct username and password.' })
@@ -48,19 +65,21 @@ exports.loginAdmin = async (req, res) => {
 
 // Cached middleware
 // To use the cache middlwware, pass it as a second parameter inside the routes call
-function cache(req, res, next){
-    const {username } = req.params;
-    client.get(username, (err, data) => {
-        if (err) throw err;
+// function cache(req, res, next){
+//     const {username } = req.params;
+//     // client.get(username, (err, data) => {
+//     //     if (err) throw err;
 
-        if (data !== null){
-            // res.send(setResponse(username,data))
-            res.send("Data")
-        } else {
-            next();
-        }
-    })
-}
+//     //     if (data !== null){
+//     //         // res.send(setResponse(username,data))
+//     //         res.send("Data")
+//     //     } else {
+//     //         next();
+//     //     }
+//     // })
+// }
+
+
 
 // Admin logout
 exports.logoutAdmin = async (req, res) => {

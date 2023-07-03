@@ -3,13 +3,21 @@ GET http://localhost:3000/auth/staff
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiJhZG1pbjAxIiwidXNlcm5hbWUiOiJyb2xseSIsIm5hbWUiOiJPcm9ib2xhIFJvbGFuZCBPZ3VuZGlwZSIsImlhdCI6MTY4NjkyMDA5MywiZXhwIjoxNjg2OTIwMjEzfQ.iiCkCHu7LzY6Uz7rn0pbS01ysXPNOhmRV1G8bTLM3pM
 
 
+### grantLoginAccessToAdmin
+POST http://localhost:3000/grant-admin-access
+Content-Type: application/json
+
+{
+    "accessCode": "xaBOX251"
+}
+
 ### loginAdmin
 POST http://localhost:3000/loginAdmin
 Content-Type: application/json
 
 {
     "username": "rolly",
-    "password": "12345"
+    "password": "12345b"
 }
 
 
