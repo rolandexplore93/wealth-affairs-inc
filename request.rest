@@ -8,7 +8,7 @@ POST http://localhost:3000/grant-admin-access
 Content-Type: application/json
 
 {
-    "accessCode": "xaBOX251"
+    "accessCode": "xaBOX251n"
 }
 
 ### loginAdmin
@@ -23,4 +23,33 @@ Content-Type: application/json
 
 ### LogoutAdmin
 POST http://localhost:3000/logoutAdmin
+Content-Type: application/json
+
+
+### createStaffUser
+POST http://localhost:3000/auth/register-staff
+Content-Type: application/json
+
+{
+    "firstname": "jj",
+    "middlename": "jj",
+    "lastname": "jj",
+    "phoneno": "4788755344",
+    "role": "FA"
+}
+
+
+### deleteStaff
+DELETE http://localhost:3000/auth/staff/64a321309b40291d5f7debb2
+Content-Type: application/json
+
+
+
+### Homepage
+GET http://localhost:3000/
+Content-Type: application/json
+
+
+### Non existing page
+GET http://localhost:3000/jshs
 Content-Type: application/json

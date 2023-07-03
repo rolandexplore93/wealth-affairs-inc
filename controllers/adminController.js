@@ -1,12 +1,13 @@
 require('dotenv').config(); // Access environment variables
 const { default: mongoose } = require('mongoose');
 const configAdmin = require('../configadmin');
-const bcrypt = require('bcrypt');
+// const bcrypt = require('bcrypt');
 const staff = require('../models/staff');
 const clients = require('../models/client');
 const jwt = require('jsonwebtoken');
 const redis = require('redis'); 
 const util = require('util');
+const createError = require('http-errors');
 
 // Initialize redis port
 // const REDIS_PORT = process.env.PORT || 6379;
@@ -14,29 +15,23 @@ const util = require('util');
 // client.set = util.promisify(client.set)
 // client.get = util.promisify(client.get)
 
-
 let crypto;
 crypto = require('node:crypto'); // For randam generation of bytes
-try {
-    //   console.log(crypto)
-} catch (err) {
+try {} catch (err) {
   console.error('crypto support is disabled!');
 }
 
 // grant-admin-access
-exports.grantLoginAccessToAdmin = async (req, res) => {
+exports.grantLoginAccessToAdmin = async (req, res, next) => {
     const { accessCode } = req.body;
-    console.log(accessCode)
     try {
-        if (accessCode === configAdmin.accessCode){
-            res.status(200).json({ redirectUrl: 'http://localhost:3000/loginAdmin', message: 'Access code is valid',  success: true });
-            // Route user to login page
-            // res.redirect(301, 'http://localhost:3000/loginAdmin');
-        } else {
-            res.status(400).json({ message: 'Incorrect access code. Please, try again!', success: false })
-        }
+        if (!accessCode) throw createError.BadRequest("Access code is required!");
+        if (accessCode !== configAdmin.accessCode) throw createError.BadRequest('Please, enter correct access code.');
+        res.status(200).json({ redirectUrl: 'http://localhost:3000/loginAdmin', message: 'Access code is valid',  success: true });
+        // Route user to login page
+        // res.redirect(301, 'http://localhost:3000/loginAdmin');
     } catch (error) {
-        res.status(500).json({ message: error.message, success: false })
+        next(error)
     }
 }
 
@@ -46,7 +41,7 @@ exports.loginAdmin = async (req, res) => {
     const usernameInLowerCase = username.toLowerCase();
     try {
         if (usernameInLowerCase === configAdmin.username && password === configAdmin.password){
-            const loginToken = await jwt.sign({ _id: configAdmin.id, username: configAdmin.username, name: configAdmin.name }, process.env.SECRETJWT, { expiresIn: '30s' });
+            const loginToken = await jwt.sign({ _id: configAdmin.id, username: configAdmin.username, name: configAdmin.name }, process.env.SECRETJWT, { expiresIn: '15m' });
             res.set('Authorization', `Bearer ${loginToken}`);
             // Set login token in client-side cookies as HTTP-only cookie
             // res.cookie('authToken', loginToken, { httpOnly: true });
@@ -93,7 +88,7 @@ exports.logoutAdmin = async (req, res) => {
 // Create staff user
 exports.createStaffUser = async (req, res) => {
     // Grant access to only admin
-    if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Sorry, only Admin can access this page' });
+    // if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Sorry, only Admin can access this page' });
     let { firstname, middlename, lastname, phoneno, role } = req.body;
     const companydomainmail = '@wealthaffairs.com';
 
@@ -123,14 +118,14 @@ exports.createStaffUser = async (req, res) => {
         return passoutcome.join('')
     }
     const staffPassword = await generatePassword()
-    const salt = await bcrypt.genSalt();
-    const encryptPassword = await bcrypt.hash(staffPassword, salt)
+    // const salt = await bcrypt.genSalt();
+    // const encryptPassword = await bcrypt.hash(staffPassword, salt)
 
     const staffData = {
         firstname, middlename, lastname, role, 
         phoneNo: phoneno, 
         email: staffEmail,  
-        password: encryptPassword
+        password: staffPassword
     }
 
     // Check if phone number or email already exists in the db
@@ -149,9 +144,8 @@ exports.createStaffUser = async (req, res) => {
 
     // Save staff to the database
     try {
-        const createStaff = await new staff(staffData);
-        const staffAddedToDb = await createStaff.save().select('-password');
-        console.log(staffAddedToDb)
+        const createStaff = await new staff(staffData).save();
+        const staffAddedToDb = await staff.findById(createStaff._id).select('-password');
         return res.status(200).json({
             message: 'Staff created successfully.',
             staffAddedToDb,
@@ -225,7 +219,7 @@ exports.editStaff =  async (req, res) => {
 // View delete user (id)
 exports.deleteStaff =  async (req, res) => {
     // Grant access to only admin
-    if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Sorry, only Admin can access this page' });
+    // if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Sorry, only Admin can access this page' });
     try {
         const staffId = req.params.id;
         if (!mongoose.Types.ObjectId.isValid(staffId)) return res.status(400).json({ message: 'Invalid ID' });
@@ -272,7 +266,7 @@ exports.getClientById =  async (req, res) => {
 // Modify client details (id)
 exports.editClient =  async (req, res) => {
     // Grant access to only admin
-    if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Sorry, only Admin can access this page' });
+    if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Sorry, only authorise Admin can access this page' });
     try {
         const clientId = req.params.id;
         // Check if the client id is valid before interacting with the database
