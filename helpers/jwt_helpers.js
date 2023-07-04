@@ -17,7 +17,7 @@ module.exports = {
         if (!retrieveLoginToken) return next(createError.Unauthorized());
         const accessLoginToken = retrieveLoginToken.split(' ')[1];
     
-        await JWT.verify(accessLoginToken, process.env.SECRETJWT, (err, payload) => {
+        JWT.verify(accessLoginToken, process.env.SECRETJWT, (err, payload) => {
             if (err) {
                 const message = err.name === 'JsonWebTokenError' ? 'Unauthorized' : 'Session token has expired. Please, login again'
                 return next(createError.Unauthorized(message));
