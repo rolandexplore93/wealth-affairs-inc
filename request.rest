@@ -1,6 +1,6 @@
 ### View all staff (Only admin)
 GET http://localhost:3000/auth/staff
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiJhZG1pbjAxIiwidXNlcm5hbWUiOiJyb2xseSIsIm5hbWUiOiJPcm9ib2xhIFJvbGFuZCBPZ3VuZGlwZSIsImlhdCI6MTY4NjkyMDA5MywiZXhwIjoxNjg2OTIwMjEzfQ.iiCkCHu7LzY6Uz7rn0pbS01ysXPNOhmRV1G8bTLM3pM
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiJhZG1pbjEiLCJ1c2VybmFtZSI6InJvbGx5IiwibmFtZSI6Ik9yb2JvbGEgUm9sYW5kIE9ndW5kaXBlIiwiaXNzIjoiV2VhbHRoIEFmZmFpcnMgSW5jIiwiYXVkIjoiSW52ZXN0b3JzIiwiaWF0IjoxNjg4NDg5ODk5LCJleHAiOjE2ODg0ODk5NTl9.pRrwYBIKNtMDGmIK9AmSMdWEigMu4rwC0Sd1P6EXakA
 
 
 ### grantLoginAccessToAdmin
@@ -17,7 +17,7 @@ Content-Type: application/json
 
 {
     "username": "rolly",
-    "password": "12345b"
+    "password": "12345"
 }
 
 

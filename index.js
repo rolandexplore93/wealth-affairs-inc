@@ -7,7 +7,7 @@ const staffRouter = require('./routes/staffRoutes');
 const morgan = require('morgan');
 const createError = require('http-errors');
 
-require('./helpers/database_init/db'); // Establish connection to database
+require('./helpers/dbconnection'); // Establish connection to database
 require('dotenv').config(); // Access environment variables
 // const { swaggerSpecs, swaggerUi } = require('./swagger'); // Import swagger.js module
 const swagger = require('./swagger');

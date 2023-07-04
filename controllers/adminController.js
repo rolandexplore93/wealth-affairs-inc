@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken');
 const redis = require('redis'); 
 const util = require('util');
 const createError = require('http-errors');
-
+const { signInToken } = require('../helpers/jwt_helpers');
 // Initialize redis port
 // const REDIS_PORT = process.env.PORT || 6379;
 // const client = redis.createClient(REDIS_PORT);
@@ -41,8 +41,13 @@ exports.loginAdmin = async (req, res) => {
     const usernameInLowerCase = username.toLowerCase();
     try {
         if (usernameInLowerCase === configAdmin.username && password === configAdmin.password){
-            const loginToken = await jwt.sign({ _id: configAdmin.id, username: configAdmin.username, name: configAdmin.name }, process.env.SECRETJWT, { expiresIn: '15m' });
-            res.set('Authorization', `Bearer ${loginToken}`);
+
+            // Generate login token of user using JWT
+            const payload = { _id: configAdmin.id, username: configAdmin.username, name: configAdmin.name, iss: 'Wealth Affairs Inc', aud: 'Investors' };
+            const options = { expiresIn: '1m'}
+            const loginToken = await signInToken(payload, options)
+            // res.set('Authorization', `Bearer ${loginToken}`);
+            
             // Set login token in client-side cookies as HTTP-only cookie
             // res.cookie('authToken', loginToken, { httpOnly: true });
 
@@ -53,8 +58,7 @@ exports.loginAdmin = async (req, res) => {
             res.status(401).json({ success: false, message: 'Invalid credentials. Please, enter correct username and password.' })
         }
     } catch (error) {
-        console.log(error.message);
-        res.status(500).json({ success: false, errorMessage: 'Server Error. Please try again.' });
+        res.status(500).json({ success: false, errorMessage: 'Server Error. Please try again.', reasonit: error.message });
     }
 };
 
