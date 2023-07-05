@@ -4,10 +4,10 @@ const createError = require('http-errors');
 
 module.exports = {
     signInToken:  (payload, options) => {
-        return  new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
             const secretKey = process.env.SECRETJWT
             JWT.sign(payload, secretKey, options, (err, token) => {
-                if (err) reject (err);
+                if (err) reject(createError.InternalServerError());
                 resolve(token);
             })
         })
@@ -25,7 +25,16 @@ module.exports = {
             req.user = payload;
             next();
         });
-    }  
+    },
+    signRefreshToken: (payload, options) => {
+        return new Promise((resolve, reject) => {
+            const secretKey = process.env.REFRESHTOKENSECRETJWT
+            JWT.sign(payload, secretKey, options, (err, token) => {
+                if (err) reject(createError.InternalServerError());
+                resolve(token);
+            })
+        })
+    },
 }
 
 

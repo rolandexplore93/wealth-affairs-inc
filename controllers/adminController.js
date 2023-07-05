@@ -9,6 +9,10 @@ const redis = require('redis');
 const util = require('util');
 const createError = require('http-errors');
 const { signInToken } = require('../helpers/jwt_helpers');
+const redisClient = require('../helpers/redis_init');
+// const client = require("../helpers/redis_init");
+// redisClient
+
 // Initialize redis port
 // const REDIS_PORT = process.env.PORT || 6379;
 // const client = redis.createClient(REDIS_PORT);
@@ -21,6 +25,8 @@ try {} catch (err) {
   console.error('crypto support is disabled!');
 }
 
+redisClient.SET('state', 'Cambridge');
+redisClient.GET('state')
 // grant-admin-access
 exports.grantLoginAccessToAdmin = async (req, res, next) => {
     const { accessCode } = req.body;
