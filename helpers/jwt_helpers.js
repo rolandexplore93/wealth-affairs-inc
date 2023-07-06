@@ -1,6 +1,7 @@
 require('dotenv').config(); // Access environment variables
 const JWT = require('jsonwebtoken');
 const createError = require('http-errors');
+const redisClient = require('./redis_init');
 
 module.exports = {
     signInToken:  (payload, options) => {
@@ -30,11 +31,48 @@ module.exports = {
         return new Promise((resolve, reject) => {
             const secretKey = process.env.REFRESHTOKENSECRETJWT
             JWT.sign(payload, secretKey, options, (err, token) => {
-                if (err) reject(createError.InternalServerError());
-                resolve(token);
+                if (err) {
+                    console.log(err.message);
+                    reject(createError.InternalServerError())
+                };
+                // resolve(token);
+
+                // Save the return token inside redis cache. The expiry time is in seconds
+                redisClient.SET(payload.userId, token, 'EX', 365 * 24 * 60 * 60, (err, reply) => { // reply is sent from redis
+                    if (err) { // If there is an error, you want to reject the call/promise or you do not want to sign the token. or you do not want to resolve the promise with the token. Instead you want 
+                        console.log(err.message);
+                        reject(createError.InternalServerError())
+                        return
+                    }
+                    resolve(token)
+                })
             })
         })
     },
+    verifyRefreshToken: (refreshToken) => {
+        return new Promise((resolve, reject) => {
+            JWT.verify(refreshToken, process.env.REFRESHTOKENSECRETJWT, (err, payload) => {
+                if (err) {
+                    const message = err.name === 'JsonWebTokenError' ? 'Unauthorized' : 'Session token has expired. Please, login again'
+                    return reject(createError.Unauthorized(message));
+                }
+                const userId = payload.userId
+
+                redisClient.GET(userId, (err, result) => {
+                    if (err) {
+                        console.log(err.message);
+                        reject(createError.InternalServerError());
+                        return
+                    };
+
+                    if (refreshToken === result) return resolve(userId);
+                    reject(createError.Unauthorized());
+                })
+
+                resolve(user)
+            })
+        })
+    }
 }
 
 

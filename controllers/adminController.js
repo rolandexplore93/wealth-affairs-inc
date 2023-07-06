@@ -5,19 +5,9 @@ const configAdmin = require('../configadmin');
 const staff = require('../models/staff');
 const clients = require('../models/client');
 const jwt = require('jsonwebtoken');
-const redis = require('redis'); 
-const util = require('util');
 const createError = require('http-errors');
 const { signInToken } = require('../helpers/jwt_helpers');
 const redisClient = require('../helpers/redis_init');
-// const client = require("../helpers/redis_init");
-// redisClient
-
-// Initialize redis port
-// const REDIS_PORT = process.env.PORT || 6379;
-// const client = redis.createClient(REDIS_PORT);
-// client.set = util.promisify(client.set)
-// client.get = util.promisify(client.get)
 
 let crypto;
 crypto = require('node:crypto'); // For randam generation of bytes
@@ -25,10 +15,14 @@ try {} catch (err) {
   console.error('crypto support is disabled!');
 }
 
-redisClient.SET('state', 'Cambridge');
-redisClient.GET('state')
 // grant-admin-access
 exports.grantLoginAccessToAdmin = async (req, res, next) => {
+    const a = await redisClient.GET('state', (err, value) => {
+        if (err) console.log(err)
+        console.log(value)
+    })
+    
+    console.log(a)
     const { accessCode } = req.body;
     try {
         if (!accessCode) throw createError.BadRequest("Access code is required!");
@@ -67,24 +61,6 @@ exports.loginAdmin = async (req, res) => {
         res.status(500).json({ success: false, errorMessage: 'Server Error. Please try again.', reasonit: error.message });
     }
 };
-
-// Cached middleware
-// To use the cache middlwware, pass it as a second parameter inside the routes call
-// function cache(req, res, next){
-//     const {username } = req.params;
-//     // client.get(username, (err, data) => {
-//     //     if (err) throw err;
-
-//     //     if (data !== null){
-//     //         // res.send(setResponse(username,data))
-//     //         res.send("Data")
-//     //     } else {
-//     //         next();
-//     //     }
-//     // })
-// }
-
-
 
 // Admin logout
 exports.logoutAdmin = async (req, res) => {
