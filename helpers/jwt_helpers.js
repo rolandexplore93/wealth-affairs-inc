@@ -4,9 +4,10 @@ const createError = require('http-errors');
 const redisClient = require('./redis_init');
 
 module.exports = {
-    signInToken:  (payload, options) => {
+    signInToken:  (payload) => {
         return new Promise((resolve, reject) => {
-            const secretKey = process.env.SECRETJWT
+            const secretKey = process.env.SECRETJWT;
+            const options = { expiresIn: '10m'}
             JWT.sign(payload, secretKey, options, (err, token) => {
                 if (err) reject(createError.InternalServerError());
                 resolve(token);
@@ -27,25 +28,25 @@ module.exports = {
             next();
         });
     },
-    signRefreshToken: (payload, options) => {
+    signRefreshToken: (payload) => {
         return new Promise((resolve, reject) => {
-            const secretKey = process.env.REFRESHTOKENSECRETJWT
+            const secretKey = process.env.REFRESHTOKENSECRETJWT;
+            const options = { expiresIn: '1d'}
             JWT.sign(payload, secretKey, options, (err, token) => {
                 if (err) {
                     console.log(err.message);
                     reject(createError.InternalServerError())
                 };
-                // resolve(token);
 
                 // Save the return token inside redis cache. The expiry time is in seconds
-                redisClient.SET(payload.userId, token, 'EX', 365 * 24 * 60 * 60, (err, reply) => { // reply is sent from redis
-                    if (err) { // If there is an error, you want to reject the call/promise or you do not want to sign the token. or you do not want to resolve the promise with the token. Instead you want 
+                redisClient.SET(payload._id, token, { 'EX': 1 * 24 * 60 * 60 }, (err, reply) => { // reply is sent from redis
+                    if (err) { // If there is an error, you want to reject the call/promise //or you do not want to sign the token. or you do not want to resolve the promise with the token. Instead you want 
                         console.log(err.message);
                         reject(createError.InternalServerError())
                         return
                     }
-                    resolve(token)
                 })
+                resolve(token)
             })
         })
     },
@@ -56,7 +57,7 @@ module.exports = {
                     const message = err.name === 'JsonWebTokenError' ? 'Unauthorized' : 'Session token has expired. Please, login again'
                     return reject(createError.Unauthorized(message));
                 }
-                const userId = payload.userId
+                const userId = payload._id
 
                 redisClient.GET(userId, (err, result) => {
                     if (err) {
@@ -68,7 +69,6 @@ module.exports = {
                     if (refreshToken === result) return resolve(userId);
                     reject(createError.Unauthorized());
                 })
-
                 resolve(user)
             })
         })

@@ -4,9 +4,9 @@ const configAdmin = require('../configadmin');
 // const bcrypt = require('bcrypt');
 const staff = require('../models/staff');
 const clients = require('../models/client');
-const jwt = require('jsonwebtoken');
+const JWT = require('jsonwebtoken');
 const createError = require('http-errors');
-const { signInToken } = require('../helpers/jwt_helpers');
+const { signInToken, signRefreshToken, verifyRefreshToken } = require('../helpers/jwt_helpers');
 const redisClient = require('../helpers/redis_init');
 
 let crypto;
@@ -17,12 +17,6 @@ try {} catch (err) {
 
 // grant-admin-access
 exports.grantLoginAccessToAdmin = async (req, res, next) => {
-    const a = await redisClient.GET('state', (err, value) => {
-        if (err) console.log(err)
-        console.log(value)
-    })
-    
-    console.log(a)
     const { accessCode } = req.body;
     try {
         if (!accessCode) throw createError.BadRequest("Access code is required!");
@@ -33,7 +27,7 @@ exports.grantLoginAccessToAdmin = async (req, res, next) => {
     } catch (error) {
         next(error)
     }
-}
+};
 
 // Admin login
 exports.loginAdmin = async (req, res) => {
@@ -42,25 +36,38 @@ exports.loginAdmin = async (req, res) => {
     try {
         if (usernameInLowerCase === configAdmin.username && password === configAdmin.password){
 
-            // Generate login token of user using JWT
-            const payload = { _id: configAdmin.id, username: configAdmin.username, name: configAdmin.name, iss: 'Wealth Affairs Inc', aud: 'Investors' };
-            const options = { expiresIn: '1m'}
-            const loginToken = await signInToken(payload, options)
+            // Generate login access token
+            const payload = { _id: configAdmin.id, username: configAdmin.username, name: configAdmin.name, iss: 'Wealth Affairs Inc', aud: 'Admin' };
+            const loginToken = await signInToken(payload);
+            console.log(loginToken)
+            const refreshToken = await signRefreshToken(payload)
+            // console.log(refreshToken)
+            
             // res.set('Authorization', `Bearer ${loginToken}`);
             
             // Set login token in client-side cookies as HTTP-only cookie
             // res.cookie('authToken', loginToken, { httpOnly: true });
 
-            // redisClient.set('admin-token', loginToken, "EX", 10) // Store the token in Redis
-            // client.set(`${configAdmin.id}`, JSON.stringify(loginToken), 'EX', 30);
-            return res.status(200).json({ success: true, message: 'Login successful...', loginToken });
+            return res.status(200).json({ success: true, message: 'Login successful...', loginToken, refreshToken });
         } else {
-            res.status(401).json({ success: false, message: 'Invalid credentials. Please, enter correct username and password.' })
+            res.status(401).json({ success: false, message: 'Invalid credentials. Please, enter correct username and password.' });
         }
     } catch (error) {
-        res.status(500).json({ success: false, errorMessage: 'Server Error. Please try again.', reasonit: error.message });
+        res.status(500).json({ success: false, errorMessage: 'Server Error. Please try again.' });
     }
 };
+
+exports.refreshAccessToken = async (req, res) => {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) return createError.BadRequest('Refresh token is missing');
+
+    // Verfiy the refresh token if it is valid
+    const isRefreshTokenVerified = await verifyRefreshToken(refreshToken);
+    if (isRefreshTokenVerified) {
+        signInToken();
+    }
+}
 
 // Admin logout
 exports.logoutAdmin = async (req, res) => {

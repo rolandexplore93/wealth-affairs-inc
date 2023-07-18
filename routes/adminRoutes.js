@@ -6,6 +6,7 @@ const { isAuthorize } = require('../helpers/jwt_helpers');
 
 adminRouter.post('/grant-admin-access', adminController.grantLoginAccessToAdmin);
 adminRouter.post('/loginAdmin', adminController.loginAdmin);
+adminRouter.post('/refresh-access-token', adminController.refreshAccessToken);
 adminRouter.post('/logoutAdmin', isAuthorize, adminController.logoutAdmin);
 adminRouter.post('/auth/register-staff', isAuthorize, adminController.createStaffUser);
 adminRouter.get('/auth/staff', isAuthorize, adminController.getAllStaff);
