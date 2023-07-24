@@ -20,8 +20,8 @@ exports.grantLoginAccessToAdmin = async (req, res, next) => {
     const { accessCode } = req.body;
     try {
         if (!accessCode) throw createError.BadRequest("Access code is required!");
-        if (accessCode !== configAdmin.accessCode) throw createError.BadRequest('Please, enter correct access code.');
-        res.status(200).json({ redirectUrl: 'http://localhost:3000/loginAdmin', message: 'Access code is valid',  success: true });
+        if (accessCode !== configAdmin.accessCode) throw createError.Unauthorized('Please, enter correct access code.');
+        return res.status(200).json({ redirectUrl: 'http://localhost:3000/loginAdmin', message: 'You are now redirected to admin login page',  success: true });
         // Route user to login page
         // res.redirect(301, 'http://localhost:3000/loginAdmin');
     } catch (error) {
@@ -32,50 +32,49 @@ exports.grantLoginAccessToAdmin = async (req, res, next) => {
 // Admin login
 exports.loginAdmin = async (req, res) => {
     const { username, password } = req.body;
-    const usernameInLowerCase = username.toLowerCase();
     try {
+        if (!username || !password) return res.status(400).json({ message: "Both username and password are required", success: false })
+
+        const usernameInLowerCase = username.toLowerCase();
         if (usernameInLowerCase === configAdmin.username && password === configAdmin.password){
 
             // Generate login access token
             const payload = { _id: configAdmin.id, username: configAdmin.username, name: configAdmin.name, iss: 'Wealth Affairs Inc', aud: 'Admin' };
+            console.log('1= ' + payload)
             const loginToken = await signInToken(payload);
-            console.log(loginToken)
             const refreshToken = await signRefreshToken(payload)
-            // console.log(refreshToken)
             
-            // res.set('Authorization', `Bearer ${loginToken}`);
-            
+            // res.set('Authorization', `Bearer ${loginToken}`);            
             // Set login token in client-side cookies as HTTP-only cookie
             // res.cookie('authToken', loginToken, { httpOnly: true });
-
-            return res.status(200).json({ success: true, message: 'Login successful...', loginToken, refreshToken });
+            return res.status(200).json({ message: 'Login successful...', loginToken, refreshToken, success: true });
         } else {
-            res.status(401).json({ success: false, message: 'Invalid credentials. Please, enter correct username and password.' });
+            return res.status(401).json({ message: 'Invalid credentials. Please, enter correct username and password.', success: false });
         }
     } catch (error) {
-        res.status(500).json({ success: false, errorMessage: 'Server Error. Please try again.' });
+        return res.status(500).json({ message: 'Server Error. Please try again.', success: false });
     }
 };
 
-exports.refreshAccessToken = async (req, res) => {
-    const { refreshToken } = req.body;
-
-    if (!refreshToken) return createError.BadRequest('Refresh token is missing');
-
-    // Verfiy the refresh token if it is valid
-    const isRefreshTokenVerified = await verifyRefreshToken(refreshToken);
-    if (isRefreshTokenVerified) {
-        signInToken();
+exports.refreshAccessToken = async (req, res, next) => {
+    try {
+        const { refreshToken } = req.body;
+        if (!refreshToken) throw createError.BadRequest('Refresh token is missing');
+        // Verify the refresh token if it is valid
+        const userPayload = await verifyRefreshToken(refreshToken);
+        const loginToken = await signInToken(userPayload);
+        const refreshLoginToken = await signRefreshToken(userPayload);
+        res.set('Authorization', `Bearer ${loginToken}`);
+        return res.status(200).json({ message: 'Your browsing session has been extended.', loginToken, refreshLoginToken, userPayload, success: true })
+    } catch (error) {
+        next(error)
     }
 }
 
 // Admin logout
 exports.logoutAdmin = async (req, res) => {
     res.removeHeader('Authorization'); // This will clear the token in authorization header if response header is used to store the login token
-    // res.clearCookie('authToken'); // if cookie is used to store the login token
-    // client.del('admin-token');
     res.status(200).json({ message: 'You are now logged out.' })
-    // res.redirect('/loginAdmin')  // redirect admin to login page  
 }
 
 // Create staff user
@@ -126,11 +125,11 @@ exports.createStaffUser = async (req, res) => {
     
     if (existingStaffInfo){
         if (existingStaffInfo.phoneNo === phoneno){
-            res.status(409).json({ errorMessage: 'Phone number already exists.'});
+            res.status(409).json({ message: 'Phone number already exists.'});
             return;
         }
         if (existingStaffInfo.email === staffEmail){
-            res.status(409).json({ errorMessage: 'Email already exists.'});
+            res.status(409).json({ message: 'Email already exists.'});
             return;
         }
     }
@@ -146,7 +145,7 @@ exports.createStaffUser = async (req, res) => {
         })
     } catch (error) {
         console.log(error.message);
-        return res.status(500).json({ errorMessage: error.message })
+        return res.status(500).json({ message: error.message })
     }
 };
 
@@ -165,7 +164,7 @@ exports.getAllStaff =  async (req, res) => {
         }
     } catch (error) {
         console.log(error.message);
-        return res.status(500).json({ errorMessage: `Internal Server Error: ${error.message}. Please try again...` });
+        return res.status(500).json({ message: `Internal Server Error: ${error.message}. Please try again...` });
     }
 }
 
@@ -182,7 +181,7 @@ exports.getStaffById =  async (req, res) => {
         return res.status(200).json({ staffInfo });
     } catch (error) {
         console.log(error.message);
-        return res.status(500).json({ errorMessage: `Internal Server Error: ${error.message}` });
+        return res.status(500).json({ message: `Internal Server Error: ${error.message}` });
     }
 }
 
@@ -205,7 +204,7 @@ exports.editStaff =  async (req, res) => {
         return res.status(200).json({ message: 'Profile updated.', updateStaffInfo });
     } catch (error) {
         console.log(error.message);
-        return res.status(500).json({ errorMessage: `Internal Server Error: ${error.message}` });
+        return res.status(500).json({ message: `Internal Server Error: ${error.message}` });
     }
 }
 
@@ -221,28 +220,28 @@ exports.deleteStaff =  async (req, res) => {
         return res.status(200).json({ message: 'Staff account deleted!' });
     } catch (error) {
         console.log(error.message);
-        return res.status(500).json({ errorMessage: `Internal Server Error: ${error.message}` });
+        return res.status(500).json({ message: `Internal Server Error: ${error.message}` });
     }
 }
 
 // View all clients
 exports.getClients =  async (req, res) => {
     // Grant access to only admin
-    if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Sorry, only Admin can access this page' });
+    if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Please, login as an admin to access this page' });
     try {
         const allClients = await clients.find().select('-password');
         if (allClients.length === 0) return res.status(200).json({ message: 'No registered client yet!'});
         return res.status(200).json({ count: `${allClients.length}`, allClients })
     } catch (error) {
         console.log(error.message);
-        return res.status(500).json({ errorMessage: `Internal Server Error: ${error.message}` });
+        return res.status(500).json({ message: `Internal Server Error: ${error.message}` });
     }
 }
 
 // View each client
 exports.getClientById =  async (req, res) => {
     // Grant access to only admin
-    if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Sorry, only Admin can access this page' });
+    if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Please, login as an admin to access this page' });
     try {
         const clientId = req.params.id;
         // Check if the client id is valid before interacting with the database
@@ -252,37 +251,41 @@ exports.getClientById =  async (req, res) => {
         return res.status(200).json({ clientInfo });
     } catch (error) {
         console.log(error.message);
-        return res.status(500).json({ errorMessage: `Internal Server Error: ${error.message}` });
+        return res.status(500).json({ message: `Internal Server Error: ${error.message}` });
     }
 }
 
 // Modify client details (id)
 exports.editClient =  async (req, res) => {
     // Grant access to only admin
-    if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Sorry, only authorise Admin can access this page' });
+    if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Please, login as an admin to access this page' });
     try {
         const clientId = req.params.id;
-        // Check if the client id is valid before interacting with the database
-        if (!mongoose.Types.ObjectId.isValid(clientId)) return res.status(404).json({ message: 'Invalid Client ID'});
+        if (!mongoose.Types.ObjectId.isValid(clientId)) return res.status(401).json({ message: 'Invalid Client ID'});
+
+        const clientDataToModify = {...req.body};
+        const updateClientData = await clients.findByIdAndUpdate(clientId, clientDataToModify, { new: true });
+        if (!updateClientData) return res.status(404).json({ message: 'Client not found', success: false })
+        return res.status(201).json({ message: 'Client profile has been updated', success: true })
     } catch (error) {
         console.log(error.message);
-        return res.status(500).json({ errorMessage: `Internal Server Error: ${error.message}` });
+        return res.status(500).json({ message: `Internal Server Error: ${error.message}` });
     }
 };
 
 // Delete client
 exports.deleteClient =  async (req, res) => {
     // Grant access to only admin
-    if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Sorry, only Admin can access this page' });
+    if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Please, login as an admin to access this page' });
     try {
         const clientId = req.params.id;
         // Check if the client id is valid before interacting with the database
-        if (!mongoose.Types.ObjectId.isValid(clientId)) return res.status(400).json({ message: 'Invalid Client ID'});
+        if (!mongoose.Types.ObjectId.isValid(clientId)) return res.status(401).json({ message: 'Invalid Client ID'});
         const deleteClientProfile = await clients.findByIdAndDelete(clientId);
         if (deleteClientProfile === null) return res.status(404).json({ message: 'Client profile does not exists in the database' });
         return res.status(200).json({ message: 'Client account has been deleted!' });
     } catch (error) {
         console.log(error.message);
-        return res.status(500).json({ errorMessage: `Internal Server Error: ${error.message}` });
+        return res.status(500).json({ message: `Internal Server Error: ${error.message}` });
     }
 };

@@ -26,7 +26,7 @@ const grantLoginAccessToAdmin = {
                         type: 'object',
                         example: {
                             redirectUrl: 'http://localhost:3000/loginAdmin', 
-                            message: 'Access code is valid',  
+                            message: 'You are now redirected to admin login page',  
                             success: true
                         }
                     }
@@ -34,7 +34,24 @@ const grantLoginAccessToAdmin = {
             }
         },
         302: { description: 'Found. Redirecting to /adminlogin'},  
-        400: { description: 'Incorrect access code. Please, try again.', success: false },
+        400: { 
+            description: 'Access code is required.',
+            content: {
+                'application/json': {
+                    schema: {
+                        type: 'object',
+                        example: {
+                            "error": {
+                              "status": 401,
+                              "message": "Access code is required!",
+                              "success": false
+                            }
+                        }
+                    }
+                }
+            }
+         },
+        401: { description: 'Please, enter correct access code.' },
         500: { description: 'Server error. Please try again.' }
     }
 };
@@ -71,6 +88,64 @@ const loginAdmin = {
             }
         },
         401: { description: 'Invalid credentials. Please, enter correct username and password.' },
+        500: { description: 'Server error. Please try again.' }
+    }
+};
+
+const refreshAccessToken = {
+    tags: ['Admin'],
+    summary: 'Extend admin session',
+    description: 'Extend admin session by refreshing the access token',
+    operationId: 'refreshAccessToken',
+    requestBody: {
+        description: 'Refresh Token',
+        content: {
+            'application/json': {
+                schema: {
+                    type: 'object',
+                    properties: {
+                        refreshToken: { type: 'string', example: 'hbdjknseyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiJhZG1pbjEiLCJ1c2VybmFtZSI6InJvbGx5IiwibmFtZSI6Ik9yb2JvbGEgUm9sYW5kIE9ndW5kaXBlIiwiaXNzIjoiV2VhbHRoIEFmZmFpcnMgSW5jIiwiYXVkIjoiQWRtaW4iLCJpYXQiOjE2ODk4NTg5MDgsImV4cCTg1OTUwOH0.fBaOMcpm7CIwN8eK_WkJa015QT2RvkrQPPTYGhCzQBY2yy27bxs013u' }
+                    }
+                },
+            },
+        },
+        required: true
+    },
+    responses: {
+        200: {
+            description: 'Ok',
+            content: {
+                'application/json': {
+                    schema: {
+                        type: 'object',
+                        example: {
+                            message: 'Your browsing session has been extended.',  
+                            loginToken: '', refreshLoginToken: '', userPayload: '',
+                            success: true
+                        }
+                    }
+                }
+            }
+        },
+        400: { 
+            description: 'Refresh token is missing.',
+            content: {
+                'application/json': {
+                    schema: {
+                        type: 'object',
+                        example: {
+                            "error": {
+                              "status": 400,
+                              "message": "Refresh token is missing",
+                              "success": false
+                            }
+                        }
+                    }
+                }
+            }
+         },
+        401: { description: 'Unauthorized or expired session..' },
+        409: { description: 'Token does not match or exist!.' }, 
         500: { description: 'Server error. Please try again.' }
     }
 };
@@ -657,6 +732,9 @@ const adminRoutesDocs = {
     },
     '/loginAdmin': {
         post: loginAdmin,
+    },
+    '/refresh-tokens': {
+        post: refreshAccessToken
     },
     '/logoutAdmin': {
         post: logoutAdmin
