@@ -19,6 +19,3 @@ adminRouter.patch('/auth/clients/:id', isAuthorize, adminController.editClient);
 adminRouter.delete('/auth/clients/:id', isAuthorize, adminController.deleteClient);
 
 module.exports = adminRouter;
-
-// tokens: [{type: object}]
-// let oldTokens = user.tokens || []

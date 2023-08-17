@@ -15,18 +15,17 @@ const swagger = require('./swagger');
 const app = express(); // Instantiate express application
 const port = process.env.PORT || 3000;
 
-// Set up middleware and cors
+// Middlewares and cors
 app.use(bodyParser.json());
 app.use(cors());
 app.use(morgan('dev'));
 app.use(swagger); // Mount swagger middleware
 
 app.get('/', (req, res, next) => {
-    // res.send('Welcome to Wealth Affairs');
     res.json({ message: 'Welcome to Wealth Affairs' })
 });
 
-// Set up routes
+// Routes
 app.use('/', adminRouter);
 app.use('/', clientRouter);
 app.use('/', staffRouter);

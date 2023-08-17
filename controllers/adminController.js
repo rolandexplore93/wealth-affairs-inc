@@ -1,7 +1,6 @@
-require('dotenv').config(); // Access environment variables
+require('dotenv').config();
 const { default: mongoose } = require('mongoose');
 const configAdmin = require('../configadmin');
-// const bcrypt = require('bcrypt');
 const staff = require('../models/staff');
 const clients = require('../models/client');
 const JWT = require('jsonwebtoken');
@@ -10,12 +9,11 @@ const { signInToken, signRefreshToken, verifyRefreshToken } = require('../helper
 const redisClient = require('../helpers/redis_init');
 
 let crypto;
-crypto = require('node:crypto'); // For randam generation of bytes
+crypto = require('node:crypto'); // For random generation of bytes
 try {} catch (err) {
   console.error('crypto support is disabled!');
 }
 
-// grant-admin-access
 exports.grantLoginAccessToAdmin = async (req, res, next) => {
     const { accessCode } = req.body;
     try {
@@ -29,7 +27,6 @@ exports.grantLoginAccessToAdmin = async (req, res, next) => {
     }
 };
 
-// Admin login
 exports.loginAdmin = async (req, res) => {
     const { username, password } = req.body;
     try {
@@ -71,13 +68,11 @@ exports.refreshAccessToken = async (req, res, next) => {
     }
 }
 
-// Admin logout
 exports.logoutAdmin = async (req, res) => {
     res.removeHeader('Authorization'); // This will clear the token in authorization header if response header is used to store the login token
     res.status(200).json({ message: 'You are now logged out.' })
 }
 
-// Create staff user
 exports.createStaffUser = async (req, res) => {
     // Grant access to only admin
     // if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Sorry, only Admin can access this page' });
@@ -110,8 +105,6 @@ exports.createStaffUser = async (req, res) => {
         return passoutcome.join('')
     }
     const staffPassword = await generatePassword()
-    // const salt = await bcrypt.genSalt();
-    // const encryptPassword = await bcrypt.hash(staffPassword, salt)
 
     const staffData = {
         firstname, middlename, lastname, role, 
@@ -149,7 +142,6 @@ exports.createStaffUser = async (req, res) => {
     }
 };
 
-// View all staff users
 exports.getAllStaff =  async (req, res) => {
     try {
         // Grant access to only admin
@@ -168,13 +160,10 @@ exports.getAllStaff =  async (req, res) => {
     }
 }
 
-// View each user (id)
 exports.getStaffById =  async (req, res) => {
-    // Grant access to only admin
+    const staffId = req.params.id;
     if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Sorry, only Admin can access this page' });
     try {
-        const staffId = req.params.id;
-        // Check if the staff id is valid before interacting with the database
         if (!mongoose.Types.ObjectId.isValid(staffId)) return res.status(400).json({ message: 'Invalid Staff ID'})
         const staffInfo = await staff.findById(staffId).select('-password');
         if (!staffInfo) return res.status(404).json({message: 'Staff not found!'});
@@ -185,12 +174,10 @@ exports.getStaffById =  async (req, res) => {
     }
 }
 
-// Modify user details (id)
 exports.editStaff =  async (req, res) => {
-    // Grant access to only admin
+    const staffId = req.params.id;
     if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Sorry, only Admin can access this page' });
     try {
-        const staffId = req.params.id;
         if (!mongoose.Types.ObjectId.isValid(staffId)) return res.status(400).json({ message: 'Invalid ID' })
 
         if (req.body.role === 'FA') role = 'Fund Administrator';
@@ -208,12 +195,11 @@ exports.editStaff =  async (req, res) => {
     }
 }
 
-// View delete user (id)
 exports.deleteStaff =  async (req, res) => {
+    const staffId = req.params.id;
     // Grant access to only admin
     // if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Sorry, only Admin can access this page' });
     try {
-        const staffId = req.params.id;
         if (!mongoose.Types.ObjectId.isValid(staffId)) return res.status(400).json({ message: 'Invalid ID' });
         const deleteStaffProfile = await staff.findByIdAndDelete(staffId);
         if (deleteStaffProfile === null) return res.status(404).json({ message: 'Staff profile does not exists in the database' });
@@ -224,9 +210,7 @@ exports.deleteStaff =  async (req, res) => {
     }
 }
 
-// View all clients
 exports.getClients =  async (req, res) => {
-    // Grant access to only admin
     if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Please, login as an admin to access this page' });
     try {
         const allClients = await clients.find().select('-password');
@@ -238,13 +222,10 @@ exports.getClients =  async (req, res) => {
     }
 }
 
-// View each client
 exports.getClientById =  async (req, res) => {
-    // Grant access to only admin
+    const clientId = req.params.id;
     if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Please, login as an admin to access this page' });
     try {
-        const clientId = req.params.id;
-        // Check if the client id is valid before interacting with the database
         if (!mongoose.Types.ObjectId.isValid(clientId)) return res.status(400).json({ message: 'Invalid Client ID'});
         const clientInfo = await clients.findById(clientId).select('-password');
         if (!clientInfo) return res.status(404).json({message: 'Client not found!'});
@@ -255,12 +236,10 @@ exports.getClientById =  async (req, res) => {
     }
 }
 
-// Modify client details (id)
 exports.editClient =  async (req, res) => {
-    // Grant access to only admin
+    const clientId = req.params.id;
     if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Please, login as an admin to access this page' });
     try {
-        const clientId = req.params.id;
         if (!mongoose.Types.ObjectId.isValid(clientId)) return res.status(401).json({ message: 'Invalid Client ID'});
 
         const clientDataToModify = {...req.body};
@@ -273,13 +252,10 @@ exports.editClient =  async (req, res) => {
     }
 };
 
-// Delete client
 exports.deleteClient =  async (req, res) => {
-    // Grant access to only admin
+    const clientId = req.params.id;
     if (req.user._id !== configAdmin.id && req.user !== configAdmin.username) return res.status(401).json({ message: 'Please, login as an admin to access this page' });
     try {
-        const clientId = req.params.id;
-        // Check if the client id is valid before interacting with the database
         if (!mongoose.Types.ObjectId.isValid(clientId)) return res.status(401).json({ message: 'Invalid Client ID'});
         const deleteClientProfile = await clients.findByIdAndDelete(clientId);
         if (deleteClientProfile === null) return res.status(404).json({ message: 'Client profile does not exists in the database' });
